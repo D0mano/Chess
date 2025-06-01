@@ -26,10 +26,12 @@ class Pieces:
 class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :
+        if self.color == WHITE :
             self.image = pygame.image.load(f"assets/pieces/white-pawn.png")
+            self.movement = DIRECTIONS_WHITE_PAWN
         else:
             self.image = pygame.image.load(f"assets/pieces/black-pawn.png")
+            self.movement = DIRECTIONS_BLACK_PAWN
 
         self.image = pygame.transform.scale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -48,6 +50,7 @@ class Knight(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
+        self.movement = KNIGHT_DIRECTION
 
 class Bishop(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -60,6 +63,7 @@ class Bishop(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
+        self.movement = BISHOP_DIRECTION
 
 class Rook(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -72,6 +76,7 @@ class Rook(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
+        self.movement = ROOK_DIRECTION
 
 class Queen(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -84,6 +89,7 @@ class Queen(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
+        self.movement = QUEEN_DIRECTION
 
 class King(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -96,3 +102,4 @@ class King(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
+        self.movement = KING_DIRECTION

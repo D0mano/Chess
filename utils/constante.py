@@ -125,13 +125,15 @@ PARTIE_NULLE = 4
 
 # === DIRECTIONS DE MOUVEMENT ===
 # Pour calculer les mouvements des pièces
-DIRECTIONS_TOUR = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Horizontal/Vertical
-DIRECTIONS_FOU = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Diagonales
-DIRECTIONS_REINE = DIRECTIONS_TOUR + DIRECTIONS_FOU
-DIRECTIONS_ROI = DIRECTIONS_REINE  # Même directions mais 1 case seulement
+DIRECTIONS_WHITE_PAWN = [(0, -1),(1, -1),(-1, -1)]
+DIRECTIONS_BLACK_PAWN = [(0, 1),(1, 1),(-1, 1)]
+ROOK_DIRECTION = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Horizontal/Vertical
+BISHOP_DIRECTION = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Diagonales
+QUEEN_DIRECTION = ROOK_DIRECTION + BISHOP_DIRECTION
+KING_DIRECTION = QUEEN_DIRECTION  # Même directions mais 1 case seulement
 
 # Mouvements du cavalier (en L)
-MOUVEMENTS_CAVALIER = [
+KNIGHT_DIRECTION = [
     (2, 1), (2, -1), (-2, 1), (-2, -1),
     (1, 2), (1, -2), (-1, 2), (-1, -2)
 ]

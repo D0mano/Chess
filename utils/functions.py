@@ -1,8 +1,9 @@
 import pygame
+import math
 from utils.constante import *
 
-list_case = [[False for _ in range(8)] for _ in range(8)]
-selected_case = []
+selected_case = [[False for _ in range(8)] for _ in range(8)]
+
 
 def chess_to_xy(pos):
     """
@@ -30,7 +31,7 @@ def xy_to_chess(pos):
         return pos_x,pos_y
     return
 
-def draw_bord(screen,x,y):
+def draw_bord(screen):
     """
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
@@ -38,11 +39,11 @@ def draw_bord(screen,x,y):
     :param y: The y-coordinate
     """
 
-    pygame.draw.rect(screen, COLOR_CLEAR_CASE, (x,y,BORD_WIDTH,BORD_HEIGHT))
+    pygame.draw.rect(screen, COLOR_CLEAR_CASE_2, (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
     for row in range(8):
         for col in range(8):
             if (row + col) % 2 != 0:
-                pygame.draw.rect(screen, COLOR_DARK_CASE, (y + row * CASE_SIZE, x + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
+                pygame.draw.rect(screen, COLOR_DARK_CASE_2, (OFFSET_PLATEAU_Y + row * CASE_SIZE, OFFSET_PLATEAU_X + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
     return pygame.Surface((BORD_WIDTH,BORD_HEIGHT))
 
 def is_select(game,event):
@@ -51,17 +52,17 @@ def is_select(game,event):
      and in the background color the previous selected case
     :param game: The game instance
     :param event: The event used to claim the position
-    :return:
+    :return: The position of the selected case
     """
     pos = chess_to_xy(xy_to_chess(event.pos))
     top_left_x = pos[0] - CASE_SIZE // 2
     top_left_y = pos[1] - CASE_SIZE // 2
     for y in range(8):
         for x in range(8):
-            if list_case[y][x]:
-                original_x = x
-                original_y = y
-                list_case[y][x] = False
+            if selected_case[y][x]:
+                selected_case[y][x] = False
+                draw_bord(game.screen)
+                """
 
                 if (x+y)%2 != 0:
                     pygame.draw.rect(game.screen, COLOR_DARK_CASE,
@@ -73,6 +74,7 @@ def is_select(game,event):
                                      (OFFSET_PLATEAU_X + x * CASE_SIZE, OFFSET_PLATEAU_Y + y * CASE_SIZE, CASE_SIZE,
                                       CASE_SIZE))
                     print(f"case blanche colore en pos {x},{y} ")
+                """
 
     for y in range(len(game.bord)):
         for x in range(len(game.bord[y])):
@@ -80,19 +82,22 @@ def is_select(game,event):
             if game.bord[y][x] is not None:
                 if game.bord[y][x].rect.collidepoint(event.pos):
                     pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    print(f"Case selectionner en {x},{y}")
-                    list_case[y][x]= True
+                    #print(f"Case selectionner en {x},{y}")
+                    selected_case[y][x]= True
                     des_x = x
                     des_y = y
                     return des_x,des_y
 
 
-def mouv(game,original_x,original_y,des_x,des_y):
-    if original_y is None or des_y is None:
+def move(game, original_x, original_y, des_x, des_y):
+    if not is_legal_move(game, original_x, original_y, des_x, des_y):
+        draw_bord(game.screen)
         return
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
+    draw_bord(game.screen)
+    """
 
     if (original_x + original_y) % 2 != 0:
         pygame.draw.rect(game.screen, COLOR_DARK_CASE,
@@ -102,6 +107,46 @@ def mouv(game,original_x,original_y,des_x,des_y):
         pygame.draw.rect(game.screen, COLOR_CLEAR_CASE,
                          (OFFSET_PLATEAU_X + original_x * CASE_SIZE, OFFSET_PLATEAU_Y + original_y * CASE_SIZE, CASE_SIZE,
                           CASE_SIZE))
+    """
+def is_collinear(v1,v2):
+    """
+    Verify if two vector are collinear
+    :param v1: Vector 1
+    :param v2: Vector 2
+    :return: Whether the vector are collinear
+    """
+    # v1 = (dx,dy) , v2 = (dx,dy)
+    return v1[0]*v2[1]-v1[1]*v2[0] == 0
+
+def is_legal_move(game, original_x, original_y, des_x, des_y):
+    """
+    Verify is the validity of a movement
+    :param game: Game instance
+    :param original_x: original x coordinate
+    :param original_y: original y coordinate
+    :param des_x: x coordinate of the destination
+    :param des_y: y coordinate of the destination
+    :return: True if the move is valid False either
+    """
+    original = game.bord[original_y][original_x]
+    destination = game.bord[des_y][des_x]
+    d_x = des_x-original_x
+    d_y = des_y-original_y
+    valid_direction =  False
+    for dir in original.movement:
+        if is_collinear((d_x,d_y),dir):
+            valid_direction = True
+    if destination is None:
+        if valid_direction:
+            return True
+        return False
+    original_color = original.color
+    des_color = destination.color
+    if original_color == des_color:
+        return False
+    elif valid_direction:
+        return True
+
 
 
 
