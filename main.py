@@ -35,7 +35,7 @@ while run:
             else:
                 start_x,start_y = selected_square[0],selected_square[1]
                 end_x,end_y = xy_to_chess(event.pos)
-                move(game, start_x, start_y, end_x, end_y)
+                print(move(game, start_x, start_y, end_x, end_y))
                 selected_square = None
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:

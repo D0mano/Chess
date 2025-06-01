@@ -15,13 +15,8 @@ class Pieces:
             return super().__new__(King)
         elif type_piece == QUEEN:
             return super().__new__(Queen)
-
-
-
     def __init__(self,color,x,y,type_piece):
         self.color = color
-
-
 
 class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -38,6 +33,8 @@ class Pawn(Pieces):
         self.rect.x = x
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x,self.rect.y))))
+        self.movement_type = JUMPING
+
 
 class Knight(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -51,6 +48,7 @@ class Knight(Pieces):
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = KNIGHT_DIRECTION
+        self.movement_type = JUMPING
 
 class Bishop(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -64,6 +62,7 @@ class Bishop(Pieces):
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = BISHOP_DIRECTION
+        self.movement_type = SLIDING
 
 class Rook(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -77,6 +76,7 @@ class Rook(Pieces):
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = ROOK_DIRECTION
+        self.movement_type = SLIDING
 
 class Queen(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -90,6 +90,7 @@ class Queen(Pieces):
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = QUEEN_DIRECTION
+        self.movement_type = SLIDING
 
 class King(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -103,3 +104,4 @@ class King(Pieces):
         self.rect.y = y
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = KING_DIRECTION
+        self.movement_type = JUMPING

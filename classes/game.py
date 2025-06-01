@@ -19,6 +19,8 @@ class Game:
                     row.append(obj)
                 else: row.append(None)
             self.bord.append(row)
+        self.turn = WHITE
+        self.nb_turn = 0
 
     def update(self):
         """
@@ -29,3 +31,8 @@ class Game:
             for x in range(8):
                 if self.bord[y][x] is not None:
                     self.bord[y][x].rect = self.bord[y][x].image.get_rect(center=(chess_to_xy((x,y))))
+
+    def switch_turn(self):
+        self.nb_turn+=1
+        self.turn = self.turn * -1
+        return self.turn

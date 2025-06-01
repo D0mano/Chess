@@ -1,5 +1,4 @@
 import pygame
-import math
 from utils.constante import *
 
 selected_case = [[False for _ in range(8)] for _ in range(8)]
@@ -35,8 +34,6 @@ def draw_bord(screen):
     """
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
-    :param x: The x-coordinate
-    :param y: The y-coordinate
     """
 
     pygame.draw.rect(screen, COLOR_CLEAR_CASE_2, (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
@@ -51,7 +48,7 @@ def is_select(game,event):
     Color in the select_color the case who is selected by the player
      and in the background color the previous selected case
     :param game: The game instance
-    :param event: The event used to claim the position
+    :param event: The event used to recover the coordinates
     :return: The position of the selected case
     """
     pos = chess_to_xy(xy_to_chess(event.pos))
@@ -82,12 +79,11 @@ def is_select(game,event):
             if game.bord[y][x] is not None:
                 if game.bord[y][x].rect.collidepoint(event.pos):
                     pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    #print(f"Case selectionner en {x},{y}")
+                    #print(f"Case selected en {x},{y}")
                     selected_case[y][x]= True
                     des_x = x
                     des_y = y
                     return des_x,des_y
-
 
 def move(game, original_x, original_y, des_x, des_y):
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
@@ -97,6 +93,7 @@ def move(game, original_x, original_y, des_x, des_y):
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     draw_bord(game.screen)
+
     """
 
     if (original_x + original_y) % 2 != 0:
@@ -108,6 +105,9 @@ def move(game, original_x, original_y, des_x, des_y):
                          (OFFSET_PLATEAU_X + original_x * CASE_SIZE, OFFSET_PLATEAU_Y + original_y * CASE_SIZE, CASE_SIZE,
                           CASE_SIZE))
     """
+    game.switch_turn()
+    return COLUMNS[des_x]+ROWS[des_y]
+
 def is_collinear(v1,v2):
     """
     Verify if two vector are collinear
@@ -130,19 +130,31 @@ def is_legal_move(game, original_x, original_y, des_x, des_y):
     """
     original = game.bord[original_y][original_x]
     destination = game.bord[des_y][des_x]
-    d_x = des_x-original_x
-    d_y = des_y-original_y
+
+    # Computation of the distance
+    d_x = des_x - original_x
+    d_y = des_y - original_y
+
+
+    if original.color != game.turn: # We  verify if it is his turn to play
+        return False
+
     valid_direction =  False
-    for dir in original.movement:
-        if is_collinear((d_x,d_y),dir):
-            valid_direction = True
+
+    if original.movement_type == SLIDING: # We verify if this is a valid move
+        # To be a valid move the directional vector need to be collinear to the move vector
+        for direct in original.movement:
+            if is_collinear((d_x,d_y),direct):
+                valid_direction = True
+    else: # If this isn't a sliding piece the move need to be in the list of movement of the piece
+
+        valid_direction = (d_x,d_y)  in original.movement
     if destination is None:
         if valid_direction:
             return True
         return False
-    original_color = original.color
-    des_color = destination.color
-    if original_color == des_color:
+
+    if original.color == destination.color:
         return False
     elif valid_direction:
         return True
