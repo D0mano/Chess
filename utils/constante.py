@@ -108,18 +108,18 @@ ROWS = ['8', '7', '6', '5', '4', '3', '2', '1']
 FPS = 60  # Images par seconde
 
 # Police pour l'affichage du texte
-TAILLE_POLICE_PIECES = 60
-TAILLE_POLICE_INTERFACE = 20
+SIZE_PIECE_POLICE = 60
+SIZE_INTERFACE_POLICE = 20
 
 # === TOUCHES CLAVIER ===
 # Codes pour les actions spéciales (à utiliser avec pygame)
-TOUCHE_NOUVELLE_PARTIE = 'n'
-TOUCHE_QUITTER = 'q'
+NEW_GAME_KEY = 'n'
+QUIT_KEY = 'q'
 
 # === ÉTATS DU JEU ===
-JEU_EN_COURS = 0
-ECHEC_ET_MAT_BLANC = 1
-ECHEC_ET_MAT_NOIR = 2
+GAME_IN_PROGRESS = 0
+WHITE_CHECKMATE = 1
+BLACK_CHECKMATE = 2
 PAT = 3
 PARTIE_NULLE = 4
 

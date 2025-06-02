@@ -83,9 +83,19 @@ def is_select(game,event):
                     selected_case[y][x]= True
                     des_x = x
                     des_y = y
+                    show_possible_move(game,(des_x,des_y))
                     return des_x,des_y
 
 def move(game, original_x, original_y, des_x, des_y):
+    """
+    Move the piece on the bord
+    :param game: The game instance
+    :param original_x: x-coordinate of the origin of the piece
+    :param original_y: y-coordinate of the origin of the piece
+    :param des_x: x-coordinate of the destination of the piece
+    :param des_y: y-coordinate of the destination of the piece
+    :return: A string describing the move
+    """
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         return
@@ -158,6 +168,31 @@ def is_legal_move(game, original_x, original_y, des_x, des_y):
         return False
     elif valid_direction:
         return True
+
+def show_possible_move(game,pos):
+    x = pos[0]
+    y = pos[1]
+    piece = game.bord[y][x]
+
+    for (d_x,d_y) in piece.movement:
+        if piece.movement_type == SLIDING:
+            for i in range(8):
+                des_x = x + d_x*i
+                des_y = y + d_y*i
+                if 0 <= des_x <= 7 and 0 <= des_y <= 7:
+
+                    pos_2 = chess_to_xy((des_x,des_y))
+                    if game.bord[des_y][des_x] is None:
+                        pygame.draw.circle(game.screen,SELECTION_COLOR,pos_2,15)
+        else:
+            des_x = x + d_x
+            des_y = y + d_y
+            # des_case = game.bord[des_y][des_x]
+            if 0 <= des_x <= 7 and 0 <= des_y <= 7:
+                pos_2 = chess_to_xy((des_x, des_y))
+                pygame.draw.circle(game.screen, SELECTION_COLOR, pos_2, 15)
+
+
 
 
 

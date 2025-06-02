@@ -1,6 +1,5 @@
 from utils.constante import *
 from classes.pieces import Pieces
-import pygame
 
 from utils.functions import chess_to_xy
 
