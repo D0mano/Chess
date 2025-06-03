@@ -35,12 +35,12 @@ def draw_bord(screen):
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
     """
-
-    pygame.draw.rect(screen, COLOR_CLEAR_CASE_2, (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
+    color = GREEN_BORD
+    pygame.draw.rect(screen, color[0], (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
     for row in range(8):
         for col in range(8):
             if (row + col) % 2 != 0:
-                pygame.draw.rect(screen, COLOR_DARK_CASE_2, (OFFSET_PLATEAU_Y + row * CASE_SIZE, OFFSET_PLATEAU_X + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
+                pygame.draw.rect(screen, color[1], (OFFSET_PLATEAU_X + row * CASE_SIZE, OFFSET_PLATEAU_Y + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
     return pygame.Surface((BORD_WIDTH,BORD_HEIGHT))
 
 def is_select(game,event):
@@ -78,7 +78,10 @@ def is_select(game,event):
 
             if game.bord[y][x] is not None:
                 if game.bord[y][x].rect.collidepoint(event.pos):
-                    pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
+                    highlight = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
+                    highlight.fill(SELECTION_COLOR_4)
+                    game.screen.blit(highlight,(top_left_x,top_left_y))
+                    #pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
                     #print(f"Case selected en {x},{y}")
                     selected_case[y][x]= True
                     des_x = x
@@ -99,22 +102,12 @@ def move(game, original_x, original_y, des_x, des_y):
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         return
+    game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     draw_bord(game.screen)
 
-    """
-
-    if (original_x + original_y) % 2 != 0:
-        pygame.draw.rect(game.screen, COLOR_DARK_CASE,
-                         (OFFSET_PLATEAU_X + original_x * CASE_SIZE, OFFSET_PLATEAU_Y + original_y * CASE_SIZE, CASE_SIZE, CASE_SIZE))
-
-    else:
-        pygame.draw.rect(game.screen, COLOR_CLEAR_CASE,
-                         (OFFSET_PLATEAU_X + original_x * CASE_SIZE, OFFSET_PLATEAU_Y + original_y * CASE_SIZE, CASE_SIZE,
-                          CASE_SIZE))
-    """
     game.switch_turn()
     return COLUMNS[des_x]+ROWS[des_y]
 
@@ -150,47 +143,75 @@ def is_legal_move(game, original_x, original_y, des_x, des_y):
         return False
 
     valid_direction =  False
+    if original.type_piece != PAWN:
 
-    if original.movement_type == SLIDING: # We verify if this is a valid move
-        # To be a valid move the directional vector need to be collinear to the move vector
-        for direct in original.movement:
-            if is_collinear((d_x,d_y),direct):
-                valid_direction = True
-    else: # If this isn't a sliding piece the move need to be in the list of movement of the piece
+        if original.movement_type == SLIDING: # We verify if this is a valid move
+            # To be a valid move the directional vector need to be collinear to the move vector
+            for direct in original.movement:
+                if is_collinear((d_x,d_y),direct):
+                    valid_direction = True
+                    break
+            if valid_direction: # We verify that there is not piece in the way
+                step_x = (d_x//abs(d_x)) if d_x != 0 else 0
+                step_y = (d_y//abs(d_y)) if d_y != 0 else 0
+                x,y = original_x + step_x , original_y + step_y
+                while (x,y) != (des_x,des_y):
+                    if game.bord[y][x] is not None:
+                        return False
+                    x += step_x
+                    y += step_y
+        else: # If this isn't a sliding piece the move need to be in the list of movement of the piece
 
-        valid_direction = (d_x,d_y)  in original.movement
-    if destination is None:
-        if valid_direction:
+            valid_direction = (d_x,d_y)  in original.movement
+        if destination is None:
+            if valid_direction:
+                return True
+            return False
+
+        if original.color == destination.color:
+            return False
+        elif valid_direction:
             return True
-        return False
+    else:
+        if original.nb_move == 0:
 
-    if original.color == destination.color:
-        return False
-    elif valid_direction:
-        return True
+            valid_direction = (d_x,d_y) in original.movement_1
+        else:
+            valid_direction = (d_x,d_y) in original.movement
+
+        if valid_direction:  # We verify that there is not piece in the way
+            step_x = (d_x // abs(d_x)) if d_x != 0 else 0
+            step_y = (d_y // abs(d_y)) if d_y != 0 else 0
+            x, y = original_x + step_x, original_y + step_y
+            while (x, y) != (des_x, des_y):
+                if game.bord[y][x] is not None:
+                    return False
+                x += step_x
+                y += step_y
+        if destination is None:
+            if valid_direction:
+                return True
+            return False
+
+
 
 def show_possible_move(game,pos):
-    x = pos[0]
-    y = pos[1]
-    piece = game.bord[y][x]
+    orig_x = pos[0]
+    orig_y = pos[1]
+    piece = game.bord[orig_y][orig_x]
 
-    for (d_x,d_y) in piece.movement:
-        if piece.movement_type == SLIDING:
-            for i in range(8):
-                des_x = x + d_x*i
-                des_y = y + d_y*i
-                if 0 <= des_x <= 7 and 0 <= des_y <= 7:
 
-                    pos_2 = chess_to_xy((des_x,des_y))
-                    if game.bord[des_y][des_x] is None:
-                        pygame.draw.circle(game.screen,SELECTION_COLOR,pos_2,15)
-        else:
-            des_x = x + d_x
-            des_y = y + d_y
-            # des_case = game.bord[des_y][des_x]
-            if 0 <= des_x <= 7 and 0 <= des_y <= 7:
-                pos_2 = chess_to_xy((des_x, des_y))
-                pygame.draw.circle(game.screen, SELECTION_COLOR, pos_2, 15)
+    for y in range(8):
+        for x in range(8):
+            if is_legal_move(game,orig_x,orig_y,x,y):
+                pos_2 = chess_to_xy((x, y))
+                top_left_x = pos_2[0] - CASE_SIZE // 2
+                top_left_y = pos_2[1] - CASE_SIZE // 2
+                circle_surf = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
+                pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (40,40), 10)
+                game.screen.blit(circle_surf,(top_left_x,top_left_y))
+
+
 
 
 

@@ -17,6 +17,9 @@ class Pieces:
             return super().__new__(Queen)
     def __init__(self,color,x,y,type_piece):
         self.color = color
+        self.type_piece = type_piece
+        self.nb_move = 0
+
 
 class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
@@ -24,10 +27,11 @@ class Pawn(Pieces):
         if self.color == WHITE :
             self.image = pygame.image.load(f"assets/pieces/white-pawn.png")
             self.movement = DIRECTIONS_WHITE_PAWN
+            self.movement_1 = DIRECTIONS_WHITE_PAWN_1
         else:
             self.image = pygame.image.load(f"assets/pieces/black-pawn.png")
             self.movement = DIRECTIONS_BLACK_PAWN
-
+            self.movement_1 = DIRECTIONS_BLACK_PAWN_1
         self.image = pygame.transform.scale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
         self.rect.x = x

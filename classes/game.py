@@ -1,6 +1,5 @@
 from utils.constante import *
 from classes.pieces import Pieces
-
 from utils.functions import chess_to_xy
 
 
@@ -19,7 +18,7 @@ class Game:
                 else: row.append(None)
             self.bord.append(row)
         self.turn = WHITE
-        self.nb_turn = 0
+        self.nb_turn = 1
 
     def update(self):
         """
@@ -32,6 +31,8 @@ class Game:
                     self.bord[y][x].rect = self.bord[y][x].image.get_rect(center=(chess_to_xy((x,y))))
 
     def switch_turn(self):
-        self.nb_turn+=1
         self.turn = self.turn * -1
+        if self.turn == WHITE:
+            self.nb_turn += 1
+
         return self.turn
