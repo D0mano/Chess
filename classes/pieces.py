@@ -28,10 +28,13 @@ class Pawn(Pieces):
             self.image = pygame.image.load(f"assets/pieces/white-pawn.png")
             self.movement = DIRECTIONS_WHITE_PAWN
             self.movement_1 = DIRECTIONS_WHITE_PAWN_1
+            self.movement_2 = DIRECTIONS_WHITE_PAWN_2
         else:
             self.image = pygame.image.load(f"assets/pieces/black-pawn.png")
             self.movement = DIRECTIONS_BLACK_PAWN
             self.movement_1 = DIRECTIONS_BLACK_PAWN_1
+            self.movement_2 = DIRECTIONS_BLACK_PAWN_2
+
         self.image = pygame.transform.scale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
         self.rect.x = x
