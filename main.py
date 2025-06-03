@@ -1,3 +1,4 @@
+from classes.interface import display_current_player
 from utils.functions import *
 from classes.game import Game
 
@@ -11,6 +12,7 @@ pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 run = True
 game = Game(screen)
+display_current_player(game)
 bord = draw_bord(screen)
 selected_square = None
 

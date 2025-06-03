@@ -1,6 +1,7 @@
 import pygame
 from utils.constante import *
 
+
 selected_case = [[False for _ in range(8)] for _ in range(8)]
 
 
@@ -35,12 +36,24 @@ def draw_bord(screen):
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
     """
-    color = GREEN_BORD
+    color = CIEL_BORD
+    pygame.draw.rect(screen, COULEUR_TEXTE,
+                     (OFFSET_PLATEAU_X - 25, OFFSET_PLATEAU_Y - 25, BORD_WIDTH + 50, BORD_HEIGHT + 50))
+
     pygame.draw.rect(screen, color[0], (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
     for row in range(8):
         for col in range(8):
             if (row + col) % 2 != 0:
                 pygame.draw.rect(screen, color[1], (OFFSET_PLATEAU_X + row * CASE_SIZE, OFFSET_PLATEAU_Y + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
+    font= pygame.font.Font(None,20)
+    for i in range(8):
+        text_number = font.render(ROWS[i],True,(150,150,150))
+        rect_number = text_number.get_rect(center=(OFFSET_PLATEAU_X-15,(OFFSET_PLATEAU_Y+CASE_SIZE//2)+(i*CASE_SIZE)))
+        screen.blit(text_number,rect_number)
+        text_letter = font.render(COLUMNS[i],True,(150,150,150))
+        rect_letter = text_letter.get_rect(center=((OFFSET_PLATEAU_X+CASE_SIZE//2)+(i*CASE_SIZE),(OFFSET_PLATEAU_Y + 8*CASE_SIZE) +10))
+        screen.blit(text_letter,rect_letter)
+
     return pygame.Surface((BORD_WIDTH,BORD_HEIGHT))
 
 def is_select(game,event):
@@ -173,26 +186,7 @@ def is_legal_move(game, original_x, original_y, des_x, des_y):
         elif valid_direction:
             return True
     else:
-        if original.nb_move == 0:
-
-            valid_direction = (d_x,d_y) in original.movement_1
-        else:
-            valid_direction = (d_x,d_y) in original.movement
-
-        if valid_direction:  # We verify that there is not piece in the way
-            step_x = (d_x // abs(d_x)) if d_x != 0 else 0
-            step_y = (d_y // abs(d_y)) if d_y != 0 else 0
-            x, y = original_x + step_x, original_y + step_y
-            while (x, y) != (des_x, des_y):
-                if game.bord[y][x] is not None:
-                    return False
-                x += step_x
-                y += step_y
-        if destination is None:
-            if valid_direction:
-                return True
-            return False
-
+        return is_legal_move_pawn(game, original_x, original_y, des_x, des_y)
 
 
 def show_possible_move(game,pos):
@@ -210,6 +204,36 @@ def show_possible_move(game,pos):
                 circle_surf = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
                 pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (40,40), 10)
                 game.screen.blit(circle_surf,(top_left_x,top_left_y))
+
+
+def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
+    original = game.bord[orig_y][orig_x]
+    destination = game.bord[des_y][des_x]
+
+    # Computation of the distance
+    d_x = des_x - orig_x
+    d_y = des_y - orig_y
+    if (d_x, d_y) in original.movement_2 and destination is not None:
+        return True
+    if original.nb_move == 0:
+
+        valid_direction = (d_x, d_y) in original.movement_1
+    else:
+        valid_direction = (d_x, d_y) in original.movement
+
+    if valid_direction:  # We verify that there is not piece in the way
+        step_x = (d_x // abs(d_x)) if d_x != 0 else 0
+        step_y = (d_y // abs(d_y)) if d_y != 0 else 0
+        x, y = orig_x + step_x, orig_y + step_y
+        while (x, y) != (des_x, des_y):
+            if game.bord[y][x] is not None:
+                return False
+            x += step_x
+            y += step_y
+    if destination is None:
+        if valid_direction:
+            return True
+        return False
 
 
 

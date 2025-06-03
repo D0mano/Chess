@@ -1,6 +1,7 @@
 from utils.constante import *
 from classes.pieces import Pieces
 from utils.functions import chess_to_xy
+from classes.interface import display_current_player
 
 
 class Game:
@@ -32,6 +33,7 @@ class Game:
 
     def switch_turn(self):
         self.turn = self.turn * -1
+        display_current_player(self)
         if self.turn == WHITE:
             self.nb_turn += 1
 
