@@ -30,6 +30,8 @@ class Game:
             for x in range(8):
                 if self.bord[y][x] is not None:
                     self.bord[y][x].rect = self.bord[y][x].image.get_rect(center=(chess_to_xy((x,y))))
+                    self.bord[y][x].x = x
+                    self.bord[y][x].y = y
 
     def switch_turn(self):
         self.turn = self.turn * -1

@@ -1,3 +1,5 @@
+from pygame import RESIZABLE
+
 from classes.interface import display_current_player
 from utils.functions import *
 from classes.game import Game
@@ -9,7 +11,7 @@ pygame.init()
 
 
 
-screen = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
+screen = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT),RESIZABLE)
 run = True
 game = Game(screen)
 display_current_player(game)
@@ -20,7 +22,6 @@ while run:
 
 
     game.update()
-
 
     for i in range(len(game.bord)):
         for piece in game.bord[i]:
@@ -36,10 +37,11 @@ while run:
                 selected_square = is_select(game, event)
             else:
                 start_x,start_y = selected_square[0],selected_square[1]
-                end_x,end_y = xy_to_chess(event.pos)
-                movement = move(game, start_x, start_y, end_x, end_y)
-                if movement is not None:
-                    print(movement)
+                if xy_to_chess(event.pos) is not None:
+                    end_x,end_y = xy_to_chess(event.pos)
+                    movement = move(game, start_x, start_y, end_x, end_y)
+                   # if movement is not None:
+                       # print(movement)
 
                 selected_square = None
         if event.type == pygame.KEYDOWN:

@@ -1,4 +1,5 @@
 import pygame
+
 from utils.constante import *
 
 
@@ -36,7 +37,7 @@ def draw_bord(screen):
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
     """
-    color = CIEL_BORD
+    color = CLASSICAL_BORD
     pygame.draw.rect(screen, COULEUR_TEXTE,
                      (OFFSET_PLATEAU_X - 25, OFFSET_PLATEAU_Y - 25, BORD_WIDTH + 50, BORD_HEIGHT + 50))
 
@@ -112,14 +113,17 @@ def move(game, original_x, original_y, des_x, des_y):
     :param des_y: y-coordinate of the destination of the piece
     :return: A string describing the move
     """
+    print(is_check(game,-game.turn))
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         return
+
     game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     draw_bord(game.screen)
+
 
     game.switch_turn()
     return COLUMNS[des_x]+ROWS[des_y]
@@ -134,7 +138,7 @@ def is_collinear(v1,v2):
     # v1 = (dx,dy) , v2 = (dx,dy)
     return v1[0]*v2[1]-v1[1]*v2[0] == 0
 
-def is_legal_move(game, original_x, original_y, des_x, des_y):
+def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False):
     """
     Verify is the validity of a movement
     :param game: Game instance
@@ -151,8 +155,7 @@ def is_legal_move(game, original_x, original_y, des_x, des_y):
     d_x = des_x - original_x
     d_y = des_y - original_y
 
-
-    if original.color != game.turn: # We  verify if it is his turn to play
+    if not ignore_turn and original.color != game.turn:
         return False
 
     valid_direction =  False
@@ -234,6 +237,34 @@ def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
         if valid_direction:
             return True
         return False
+
+def king_pos(game,color):
+    for y in range(8):
+        for x in range(8):
+            piece = game.bord[y][x]
+            if piece is not None:
+                if piece.type_piece == KING and piece.color == color:
+                    return x,y
+
+
+def is_check(game, color):
+    pos = king_pos(game, color)
+    if pos is None:
+        return False
+    # Couleur de l'adversaire (celui qui peut mettre en échec)
+    adversaire_color = -color
+    for y in range(8):
+        for x in range(8):
+            piece = game.bord[y][x]
+            if piece is not None and piece.color != adversaire_color:
+                print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
+                print(f"Testing move from ({x},{y}) to king at {pos}")
+                if is_legal_move(game, x, y, pos[0], pos[1],True):
+                    print(
+                        f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+                    return True
+    return False
+
 
 
 

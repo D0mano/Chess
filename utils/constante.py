@@ -74,7 +74,7 @@ PIECES_UNICODE = {
 }
 
 # === NOMS DES PIÈCES (pour affichage/debug) ===
-NOMS_PIECES = {
+PIECES_NAMES = {
     EMPTY: "Vide",
     PAWN: "Pawn",
     ROOK: "Rook",
