@@ -1,4 +1,5 @@
 import pygame
+import math
 
 from utils.constante import *
 
@@ -113,7 +114,6 @@ def move(game, original_x, original_y, des_x, des_y):
     :param des_y: y-coordinate of the destination of the piece
     :return: A string describing the move
     """
-    print(is_check(game,-game.turn))
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         return
@@ -123,6 +123,8 @@ def move(game, original_x, original_y, des_x, des_y):
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     draw_bord(game.screen)
+    print(is_check(game,-game.turn))
+
 
 
     game.switch_turn()
@@ -249,6 +251,9 @@ def king_pos(game,color):
 
 def is_check(game, color):
     pos = king_pos(game, color)
+    pos_xy = chess_to_xy(pos)
+    top_left_x = pos_xy[0] - CASE_SIZE // 2
+    top_left_y = pos_xy[1] - CASE_SIZE // 2
     if pos is None:
         return False
     # Couleur de l'adversaire (celui qui peut mettre en échec)
@@ -256,16 +261,81 @@ def is_check(game, color):
     for y in range(8):
         for x in range(8):
             piece = game.bord[y][x]
-            if piece is not None and piece.color != adversaire_color:
-                print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
-                print(f"Testing move from ({x},{y}) to king at {pos}")
+            if piece is not None and piece.color == adversaire_color:
+                #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
+                #print(f"Testing move from ({x},{y}) to king at {pos}")
                 if is_legal_move(game, x, y, pos[0], pos[1],True):
-                    print(
-                        f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+                    pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
+                    draw_move_arrow(game.screen,(x,y),pos)
+                    #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
                     return True
     return False
 
 
+def draw_arrow_filled(surface, color, start_pos, end_pos, arrow_width=5, arrow_head_size=15):
+    """
+    Draw a filled arrow with elegant appearance
+    :param surface: The surface to draw on
+    :param color: Color of the arrow
+    :param start_pos: Starting position (x, y)
+    :param end_pos: Ending position (x, y)
+    :param arrow_width: Width of the arrow body
+    :param arrow_head_size: Size of the arrow head
+    """
+    # Calculate direction vector
+    dx = end_pos[0] - start_pos[0]
+    dy = end_pos[1] - start_pos[1]
+
+    # Handle edge case: same start and end position
+    if dx == 0 and dy == 0:
+        return
+
+    # Normalize the direction vector
+    length = math.sqrt(dx * dx + dy * dy)
+    unit_x = dx / length
+    unit_y = dy / length
+
+    # Calculate perpendicular vector for arrow width
+    perp_x = -unit_y * arrow_width / 2
+    perp_y = unit_x * arrow_width / 2
+
+    # Calculate where the arrow body ends (before the head)
+    body_end_x = end_pos[0] - unit_x * arrow_head_size
+    body_end_y = end_pos[1] - unit_y * arrow_head_size
+
+    # Draw the arrow body (rectangle)
+    body_points = [
+        (start_pos[0] + perp_x, start_pos[1] + perp_y),
+        (start_pos[0] - perp_x, start_pos[1] - perp_y),
+        (body_end_x - perp_x, body_end_y - perp_y),
+        (body_end_x + perp_x, body_end_y + perp_y)
+    ]
+    pygame.draw.polygon(surface, color, body_points)
+
+    # Draw the arrow head (triangle)
+    head_width = arrow_width * 2
+    head_perp_x = -unit_y * head_width / 2
+    head_perp_y = unit_x * head_width / 2
+
+    head_points = [
+        end_pos,
+        (body_end_x + head_perp_x, body_end_y + head_perp_y),
+        (body_end_x - head_perp_x, body_end_y - head_perp_y)
+    ]
+    pygame.draw.polygon(surface, color, head_points)
+
+
+def draw_move_arrow(screen, start_pos, end_pos, color=POSSIBLE_MOUV):
+    """
+    Draw an arrow to show possible move
+    :param screen: The surface to draw on
+    :param color: Color of the arrow
+    :param start_pos: Starting position (x, y)
+    :param end_pos: Ending position (x, y)
+    """
+    start_pixel = chess_to_xy(start_pos)
+    end_pixel = chess_to_xy(end_pos)
+    draw_arrow_filled(screen, color, start_pixel, end_pixel, arrow_width=4, arrow_head_size=12)
 
 
 

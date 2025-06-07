@@ -21,18 +21,19 @@ class Pieces:
         self.nb_move = 0
         self.x = x
         self.y = y
+        self.path = "pieces_2"
 
 
 class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
         if self.color == WHITE :
-            self.image = pygame.image.load(f"assets/pieces/white-pawn.png")
+            self.image = pygame.image.load(f"assets/{self.path}/white-pawn.png")
             self.movement = DIRECTIONS_WHITE_PAWN
             self.movement_1 = DIRECTIONS_WHITE_PAWN_1
             self.movement_2 = DIRECTIONS_WHITE_PAWN_2
         else:
-            self.image = pygame.image.load(f"assets/pieces/black-pawn.png")
+            self.image = pygame.image.load(f"assets/{self.path}/black-pawn.png")
             self.movement = DIRECTIONS_BLACK_PAWN
             self.movement_1 = DIRECTIONS_BLACK_PAWN_1
             self.movement_2 = DIRECTIONS_BLACK_PAWN_2
@@ -48,8 +49,8 @@ class Pawn(Pieces):
 class Knight(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/pieces/white-knight.png")
-        else: self.image = pygame.image.load(f"assets/pieces/black-knight.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-knight.png")
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-knight.png")
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -62,8 +63,8 @@ class Knight(Pieces):
 class Bishop(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/pieces/white-bishop.png")
-        else: self.image = pygame.image.load(f"assets/pieces/black-bishop.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-bishop.png")
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-bishop.png")
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -76,8 +77,8 @@ class Bishop(Pieces):
 class Rook(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/pieces/white-rook.png")
-        else: self.image = pygame.image.load(f"assets/pieces/black-rook.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-rook.png")
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-rook.png")
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -90,8 +91,8 @@ class Rook(Pieces):
 class Queen(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/pieces/white-queen.png")
-        else: self.image = pygame.image.load(f"assets/pieces/black-queen.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-queen.png")
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-queen.png")
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -104,8 +105,8 @@ class Queen(Pieces):
 class King(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/pieces/white-king.png")
-        else: self.image = pygame.image.load(f"assets/pieces/black-king.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-king.png")
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-king.png")
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
