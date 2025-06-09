@@ -156,6 +156,13 @@ KNIGHT_DIRECTION = [
     (1, 2), (1, -2), (-1, 2), (-1, -2)
 ]
 
+MOVEMENT = {
+             ROOK : ROOK_DIRECTION,
+             BISHOP : BISHOP_DIRECTION,
+             KNIGHT : KNIGHT_DIRECTION,
+             KING : KING_DIRECTION,
+             QUEEN : QUEEN_DIRECTION
+            }
 #====== Piece type ========#
 JUMPING = 1
 SLIDING = 0

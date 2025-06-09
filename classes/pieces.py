@@ -28,12 +28,12 @@ class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
         if self.color == WHITE :
-            self.image = pygame.image.load(f"assets/{self.path}/white-pawn.png")
+            self.image = pygame.image.load(f"assets/{self.path}/white-pawn.png").convert_alpha()
             self.movement = DIRECTIONS_WHITE_PAWN
             self.movement_1 = DIRECTIONS_WHITE_PAWN_1
             self.movement_2 = DIRECTIONS_WHITE_PAWN_2
         else:
-            self.image = pygame.image.load(f"assets/{self.path}/black-pawn.png")
+            self.image = pygame.image.load(f"assets/{self.path}/black-pawn.png").convert_alpha()
             self.movement = DIRECTIONS_BLACK_PAWN
             self.movement_1 = DIRECTIONS_BLACK_PAWN_1
             self.movement_2 = DIRECTIONS_BLACK_PAWN_2
@@ -49,8 +49,8 @@ class Pawn(Pieces):
 class Knight(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-knight.png")
-        else: self.image = pygame.image.load(f"assets/{self.path}/black-knight.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-knight.png").convert_alpha()
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-knight.png").convert_alpha()
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -63,10 +63,10 @@ class Knight(Pieces):
 class Bishop(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-bishop.png")
-        else: self.image = pygame.image.load(f"assets/{self.path}/black-bishop.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-bishop.png").convert_alpha()
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-bishop.png").convert_alpha()
 
-        self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
+        self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES)).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -77,8 +77,8 @@ class Bishop(Pieces):
 class Rook(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-rook.png")
-        else: self.image = pygame.image.load(f"assets/{self.path}/black-rook.png")
+        if self.color == WHITE :self.image = pygame.image.load(f"assets/{self.path}/white-rook.png").convert_alpha()
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-rook.png").convert_alpha()
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -91,8 +91,8 @@ class Rook(Pieces):
 class Queen(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-queen.png")
-        else: self.image = pygame.image.load(f"assets/{self.path}/black-queen.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-queen.png").convert_alpha()
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-queen.png").convert_alpha()
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()
@@ -105,8 +105,8 @@ class Queen(Pieces):
 class King(Pieces):
     def __init__(self,color,x,y,type_piece):
         super().__init__(color,x,y,type_piece)
-        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-king.png")
-        else: self.image = pygame.image.load(f"assets/{self.path}/black-king.png")
+        if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-king.png").convert_alpha()
+        else: self.image = pygame.image.load(f"assets/{self.path}/black-king.png").convert_alpha()
 
         self.image = pygame.transform.smoothscale(self.image,(SIZE_PIECES,SIZE_PIECES))
         self.rect = self.image.get_rect()

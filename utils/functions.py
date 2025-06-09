@@ -1,5 +1,6 @@
 import pygame
 import math
+import copy
 
 from utils.constante import *
 
@@ -19,6 +20,7 @@ def chess_to_xy(pos):
         return pos_x,pos_y
     return
 
+
 def xy_to_chess(pos):
     """
     Convert the position into the bord scale
@@ -33,12 +35,13 @@ def xy_to_chess(pos):
         return pos_x,pos_y
     return
 
+
 def draw_bord(screen):
     """
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
     """
-    color = CLASSICAL_BORD
+    color = GREEN_BORD
     pygame.draw.rect(screen, COULEUR_TEXTE,
                      (OFFSET_PLATEAU_X - 25, OFFSET_PLATEAU_Y - 25, BORD_WIDTH + 50, BORD_HEIGHT + 50))
 
@@ -58,77 +61,6 @@ def draw_bord(screen):
 
     return pygame.Surface((BORD_WIDTH,BORD_HEIGHT))
 
-def is_select(game,event):
-    """
-    Color in the select_color the case who is selected by the player
-     and in the background color the previous selected case
-    :param game: The game instance
-    :param event: The event used to recover the coordinates
-    :return: The position of the selected case
-    """
-    pos = chess_to_xy(xy_to_chess(event.pos))
-    top_left_x = pos[0] - CASE_SIZE // 2
-    top_left_y = pos[1] - CASE_SIZE // 2
-    for y in range(8):
-        for x in range(8):
-            if selected_case[y][x]:
-                selected_case[y][x] = False
-                draw_bord(game.screen)
-                """
-
-                if (x+y)%2 != 0:
-                    pygame.draw.rect(game.screen, COLOR_DARK_CASE,
-                                     (OFFSET_PLATEAU_X + x * CASE_SIZE, OFFSET_PLATEAU_Y + y * CASE_SIZE, CASE_SIZE, CASE_SIZE))
-                    print(f"case noir colore en pos {x},{y} ")
-
-                else:
-                    pygame.draw.rect(game.screen, COLOR_CLEAR_CASE,
-                                     (OFFSET_PLATEAU_X + x * CASE_SIZE, OFFSET_PLATEAU_Y + y * CASE_SIZE, CASE_SIZE,
-                                      CASE_SIZE))
-                    print(f"case blanche colore en pos {x},{y} ")
-                """
-
-    for y in range(len(game.bord)):
-        for x in range(len(game.bord[y])):
-
-            if game.bord[y][x] is not None:
-                if game.bord[y][x].rect.collidepoint(event.pos):
-                    highlight = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
-                    highlight.fill(SELECTION_COLOR_4)
-                    game.screen.blit(highlight,(top_left_x,top_left_y))
-                    #pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    #print(f"Case selected en {x},{y}")
-                    selected_case[y][x]= True
-                    des_x = x
-                    des_y = y
-                    show_possible_move(game,(des_x,des_y))
-                    return des_x,des_y
-
-def move(game, original_x, original_y, des_x, des_y):
-    """
-    Move the piece on the bord
-    :param game: The game instance
-    :param original_x: x-coordinate of the origin of the piece
-    :param original_y: y-coordinate of the origin of the piece
-    :param des_x: x-coordinate of the destination of the piece
-    :param des_y: y-coordinate of the destination of the piece
-    :return: A string describing the move
-    """
-    if not is_legal_move(game, original_x, original_y, des_x, des_y):
-        draw_bord(game.screen)
-        return
-
-    game.bord[original_y][original_x].nb_move += 1
-    piece = game.bord[original_y][original_x]
-    game.bord[des_y][des_x] = piece
-    game.bord[original_y][original_x] = None
-    draw_bord(game.screen)
-    print(is_check(game,-game.turn))
-
-
-
-    game.switch_turn()
-    return COLUMNS[des_x]+ROWS[des_y]
 
 def is_collinear(v1,v2):
     """
@@ -140,9 +72,11 @@ def is_collinear(v1,v2):
     # v1 = (dx,dy) , v2 = (dx,dy)
     return v1[0]*v2[1]-v1[1]*v2[0] == 0
 
+
 def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False):
     """
     Verify is the validity of a movement
+    :param ignore_turn: Boolean value to known if we need to consider the turn
     :param game: Game instance
     :param original_x: original x coordinate
     :param original_y: original y coordinate
@@ -150,15 +84,18 @@ def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False
     :param des_y: y coordinate of the destination
     :return: True if the move is valid False either
     """
+
     original = game.bord[original_y][original_x]
     destination = game.bord[des_y][des_x]
-
     # Computation of the distance
     d_x = des_x - original_x
     d_y = des_y - original_y
 
-    if not ignore_turn and original.color != game.turn:
-        return False
+    if not ignore_turn:
+        if original.color != game.turn:
+            return False
+
+
 
     valid_direction =  False
     if original.type_piece != PAWN:
@@ -194,6 +131,45 @@ def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False
         return is_legal_move_pawn(game, original_x, original_y, des_x, des_y)
 
 
+def is_legal_move_simu(bord,o_x,o_y,d_x,d_y):
+    case_sta = bord[o_y][o_x]
+    case_end = bord[d_y][d_x]
+    distance_x = d_x - o_x
+    distance_y = d_y - o_y
+    valid_direction = False
+    if case_sta[0] != PAWN:
+
+        if case_sta[2] == SLIDING:  # We verify if this is a valid move
+            # To be a valid move the directional vector need to be collinear to the move vector
+            for direct in MOVEMENT[case_sta[0]]:
+                if is_collinear((distance_x, distance_y), direct):
+                    valid_direction = True
+                    break
+            if valid_direction:  # We verify that there is not piece in the way
+                step_x = (distance_x // abs(distance_x)) if distance_x != 0 else 0
+                step_y = (distance_y // abs(distance_y)) if distance_y != 0 else 0
+                x, y = o_x + step_x, o_y + step_y
+                while (x, y) != (d_x, d_y):
+                    if bord[y][x] is not None:
+                        return False
+                    x += step_x
+                    y += step_y
+        else:  # If this isn't a sliding piece the move need to be in the list of movement of the piece
+
+            valid_direction = (distance_x, distance_y) in MOVEMENT[case_sta[0]]
+        if case_end is None:
+            if valid_direction:
+                return True
+            return False
+
+        if case_sta[1] == case_end[1]:
+            return False
+        elif valid_direction:
+            return True
+    else:
+        return is_legal_move_pawn_simu(bord, o_x, o_y, d_x, d_y)
+
+
 def show_possible_move(game,pos):
     orig_x = pos[0]
     orig_y = pos[1]
@@ -202,7 +178,7 @@ def show_possible_move(game,pos):
 
     for y in range(8):
         for x in range(8):
-            if is_legal_move(game,orig_x,orig_y,x,y):
+            if is_legal_move(game,orig_x,orig_y,x,y) and is_safe_move(game,orig_x,orig_y,x,y):
                 pos_2 = chess_to_xy((x, y))
                 top_left_x = pos_2[0] - CASE_SIZE // 2
                 top_left_y = pos_2[1] - CASE_SIZE // 2
@@ -211,27 +187,69 @@ def show_possible_move(game,pos):
                 game.screen.blit(circle_surf,(top_left_x,top_left_y))
 
 
-def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
-    original = game.bord[orig_y][orig_x]
-    destination = game.bord[des_y][des_x]
+def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y,copy = None):
+    if copy is None:
+        original = game.bord[orig_y][orig_x]
+        destination = game.bord[des_y][des_x]
+        # Computation of the distance
+        d_x = des_x - orig_x
+        d_y = des_y - orig_y
+        if destination is not None:
+            if (d_x, d_y) in original.movement_2:
+                return True
+        if original.nb_move == 0:
+
+            valid_direction = (d_x, d_y) in original.movement_1
+        else:
+            valid_direction = (d_x, d_y) in original.movement
+
+        if valid_direction:  # We verify that there is not piece in the way
+            step_x = (d_x // abs(d_x)) if d_x != 0 else 0
+            step_y = (d_y // abs(d_y)) if d_y != 0 else 0
+            x, y = orig_x + step_x, orig_y + step_y
+            while (x, y) != (des_x, des_y):
+                if game.bord[y][x] is not None:
+                    return False
+                x += step_x
+                y += step_y
+        if destination is None:
+            if valid_direction:
+                return True
+            return False
+
+
+def is_legal_move_pawn_simu(bord,o_x,o_y,d_x,d_y):
+    original = bord[o_y][o_x]
+    destination = bord[d_y][d_x]
+    color = original[1]
 
     # Computation of the distance
-    d_x = des_x - orig_x
-    d_y = des_y - orig_y
-    if (d_x, d_y) in original.movement_2 and destination is not None:
-        return True
-    if original.nb_move == 0:
+    distance_x = d_x - o_x
+    distance_y = d_y - o_y
+    if color == WHITE:
+        if (distance_x, distance_y) in DIRECTIONS_WHITE_PAWN_2 and destination is not None:
+            return True
+        if original[3]== 0:
 
-        valid_direction = (d_x, d_y) in original.movement_1
+            valid_direction = (distance_x, distance_y) in DIRECTIONS_WHITE_PAWN_1
+        else:
+            valid_direction = (distance_x, distance_y) in DIRECTIONS_WHITE_PAWN
     else:
-        valid_direction = (d_x, d_y) in original.movement
+        if (distance_x, distance_y) in DIRECTIONS_BLACK_PAWN_2 and destination is not None:
+            return True
+        if original[3] == 0:
+
+            valid_direction = (distance_x, distance_y) in DIRECTIONS_BLACK_PAWN_1
+        else:
+            valid_direction = (distance_x, distance_y) in DIRECTIONS_BLACK_PAWN
+
 
     if valid_direction:  # We verify that there is not piece in the way
-        step_x = (d_x // abs(d_x)) if d_x != 0 else 0
-        step_y = (d_y // abs(d_y)) if d_y != 0 else 0
-        x, y = orig_x + step_x, orig_y + step_y
-        while (x, y) != (des_x, des_y):
-            if game.bord[y][x] is not None:
+        step_x = (distance_x // abs(distance_x)) if distance_x != 0 else 0
+        step_y = (distance_y // abs(distance_y)) if distance_y != 0 else 0
+        x, y = o_x + step_x, o_y + step_y
+        while (x, y) != (distance_x, distance_y):
+            if bord[y][x] is not None:
                 return False
             x += step_x
             y += step_y
@@ -240,34 +258,64 @@ def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
             return True
         return False
 
-def king_pos(game,color):
+
+def king_pos(bord,color):
     for y in range(8):
         for x in range(8):
-            piece = game.bord[y][x]
+            piece = bord[y][x]
             if piece is not None:
                 if piece.type_piece == KING and piece.color == color:
                     return x,y
 
 
-def is_check(game, color):
-    pos = king_pos(game, color)
-    pos_xy = chess_to_xy(pos)
-    top_left_x = pos_xy[0] - CASE_SIZE // 2
-    top_left_y = pos_xy[1] - CASE_SIZE // 2
-    if pos is None:
-        return False
-    # Couleur de l'adversaire (celui qui peut mettre en échec)
-    adversaire_color = -color
+def king_pos_simu(bord,color):
     for y in range(8):
         for x in range(8):
-            piece = game.bord[y][x]
-            if piece is not None and piece.color == adversaire_color:
-                #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
-                #print(f"Testing move from ({x},{y}) to king at {pos}")
-                if is_legal_move(game, x, y, pos[0], pos[1],True):
-                    pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    draw_move_arrow(game.screen,(x,y),pos)
-                    #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+            piece = bord[y][x]
+            if piece is not None:
+                if piece[0] == KING and piece[1] == color:
+                    return x,y
+
+
+
+def is_check(game, color,copy = None):
+    if copy is None:
+        pos = king_pos(game.bord,color)
+        pos_xy = chess_to_xy(pos)
+        top_left_x = pos_xy[0] - CASE_SIZE // 2
+        top_left_y = pos_xy[1] - CASE_SIZE // 2
+        if pos is None:
+            return False
+        # Couleur de l'adversaire (celui qui peut mettre en échec)
+        adversaire_color = -color
+        for y in range(8):
+            for x in range(8):
+                piece = game.bord[y][x]
+                if piece is not None and piece.color == adversaire_color:
+                    #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
+                    #print(f"Testing move from ({x},{y}) to king at {pos}")
+                    if is_legal_move(game, x, y, pos[0], pos[1],True):
+                        pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
+                        draw_move_arrow(game.screen,(x,y),pos)
+                        #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+                        return True
+        return False
+
+
+def is_check_simu(bord,color):
+    pos = king_pos_simu(bord, color)
+    if pos is None:
+        return False
+        # Couleur de l'adversaire (celui qui peut mettre en échec)
+    adversary_color = -color
+    for y in range(8):
+        for x in range(8):
+            piece = bord[y][x]
+            if piece is not None and piece[1] == adversary_color:
+                # print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
+                # print(f"Testing move from ({x},{y}) to king at {pos}")
+                if is_legal_move_simu(bord, x, y, pos[0], pos[1]):
+                    # print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
                     return True
     return False
 
@@ -336,6 +384,89 @@ def draw_move_arrow(screen, start_pos, end_pos, color=POSSIBLE_MOUV):
     start_pixel = chess_to_xy(start_pos)
     end_pixel = chess_to_xy(end_pos)
     draw_arrow_filled(screen, color, start_pixel, end_pixel, arrow_width=4, arrow_head_size=12)
+
+
+def is_safe_move(game, original_x, original_y, des_x, des_y):
+    game.bord_copy = game.copy()
+    move_simu(game.bord_copy,original_x,original_y,des_x,des_y)
+    return not is_check_simu(game.bord_copy,game.turn)
+
+
+def is_select(game,event):
+    """
+    Color in the select_color the case who is selected by the player
+     and in the background color the previous selected case
+    :param game: The game instance
+    :param event: The event used to recover the coordinates
+    :return: The position of the selected case
+    """
+    pos = chess_to_xy(xy_to_chess(event.pos))
+    top_left_x = pos[0] - CASE_SIZE // 2
+    top_left_y = pos[1] - CASE_SIZE // 2
+    for y in range(8):
+        for x in range(8):
+            if selected_case[y][x]:
+                selected_case[y][x] = False
+                draw_bord(game.screen)
+
+    for y in range(len(game.bord)):
+        for x in range(len(game.bord[y])):
+
+            if game.bord[y][x] is not None:
+                if game.bord[y][x].rect.collidepoint(event.pos):
+                    highlight = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
+                    highlight.fill(SELECTION_COLOR_4)
+                    game.screen.blit(highlight,(top_left_x,top_left_y))
+                    #pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
+                    #print(f"Case selected en {x},{y}")
+                    selected_case[y][x]= True
+                    des_x = x
+                    des_y = y
+                    show_possible_move(game,(des_x,des_y))
+                    return des_x,des_y
+
+
+def move(game, original_x, original_y, des_x, des_y):
+    """
+    Move the piece on the bord
+    :param game: The game instance
+    :param original_x: x-coordinate of the origin of the piece
+    :param original_y: y-coordinate of the origin of the piece
+    :param des_x: x-coordinate of the destination of the piece
+    :param des_y: y-coordinate of the destination of the piece
+    :return: A string describing the move
+    """
+    legal = is_legal_move(game, original_x, original_y, des_x, des_y)
+
+    if not legal:
+        draw_bord(game.screen)
+        return
+
+    if not is_safe_move(game,original_x, original_y, des_x, des_y):
+        draw_bord(game.screen)
+        return
+
+
+
+    game.bord[original_y][original_x].nb_move += 1
+    piece = game.bord[original_y][original_x]
+    game.bord[des_y][des_x] = piece
+    game.bord[original_y][original_x] = None
+    draw_bord(game.screen)
+    game.check = is_check(game,-game.turn)
+    game.switch_turn()
+    game.update()
+    return COLUMNS[des_x]+ROWS[des_y]
+
+
+def move_simu(bord,o_x,o_y,d_x,d_y):
+
+    piece = bord[o_y][o_x]
+    bord[d_y][d_x] = piece
+    bord[o_y][o_x] = None
+
+
+
 
 
 

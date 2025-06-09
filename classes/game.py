@@ -9,6 +9,7 @@ class Game:
         self.is_playing = False
         self.screen = screen
         self.bord = []
+        self.bord_copy = []
         for y in range(len(PLATEAU_INITIAL)):
             row = []
             for x in range(len(PLATEAU_INITIAL[y])):
@@ -20,6 +21,7 @@ class Game:
             self.bord.append(row)
         self.turn = WHITE
         self.nb_turn = 1
+        self.check = None
 
     def update(self):
         """
@@ -34,9 +36,25 @@ class Game:
                     self.bord[y][x].y = y
 
     def switch_turn(self):
-        self.turn = self.turn * -1
+        self.turn = -self.turn
         display_current_player(self)
         if self.turn == WHITE:
             self.nb_turn += 1
-
         return self.turn
+
+    def copy(self):
+        bord = self.bord
+        copy = []
+        for y in range(8):
+            row = []
+            for x in range(8):
+                piece = bord[y][x]
+                if piece is None:
+                    row.append(None)
+                else:
+                    row.append((piece.type_piece,piece.color,piece.movement_type,piece.nb_move))
+            copy.append(row)
+        return copy
+
+
+

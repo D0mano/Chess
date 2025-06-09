@@ -21,7 +21,7 @@ selected_square = None
 while run:
 
 
-    game.update()
+
 
     for i in range(len(game.bord)):
         for piece in game.bord[i]:
@@ -39,6 +39,7 @@ while run:
                 start_x,start_y = selected_square[0],selected_square[1]
                 if xy_to_chess(event.pos) is not None:
                     end_x,end_y = xy_to_chess(event.pos)
+                    print(game.bord[start_y][start_x])
                     movement = move(game, start_x, start_y, end_x, end_y)
                    # if movement is not None:
                        # print(movement)
