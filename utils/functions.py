@@ -297,7 +297,7 @@ def is_check(game, color):
                 if is_legal_move(game, x, y, pos[0], pos[1],True):
                     pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
                     draw_move_arrow(game.screen,(x,y),pos)
-                    print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+                    #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
                     return True
     return False
 
@@ -440,14 +440,17 @@ def move(game, original_x, original_y, des_x, des_y):
 
     if not legal:
         draw_bord(game.screen)
+        game.move_illegal_sound.play()
         return
 
     if not is_safe_move(game,original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
+        game.move_illegal_sound.play()
         return
 
-
-
+    capture = False
+    if game.bord[des_y][des_x] is not None:
+        capture = True
     game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
@@ -457,7 +460,12 @@ def move(game, original_x, original_y, des_x, des_y):
     game.bord[des_y][des_x].promotion()
     game.check = is_check(game, -game.turn)
     game.switch_turn()
-
+    if game.check:
+        game.move_check_sound.play()
+    elif capture:
+        game.capture_sound.play()
+    else:
+        game.move_self_sound.play()
 
     return COLUMNS[des_x]+ROWS[des_y]
 

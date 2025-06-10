@@ -1,4 +1,5 @@
 from utils.constante import *
+import pygame
 from classes.pieces import Pieces
 from utils.functions import chess_to_xy
 from classes.interface import display_current_player
@@ -22,6 +23,14 @@ class Game:
         self.turn = WHITE
         self.nb_turn = 1
         self.check = None
+        self.game_start_sound = pygame.mixer.Sound(f"assets/sounds/game-start.mp3")
+        self.game_end_sound = pygame.mixer.Sound(f"assets/sounds/game-end.mp3")
+        self.move_self_sound = pygame.mixer.Sound(f"assets/sounds/move-self.mp3")
+        self.move_check_sound = pygame.mixer.Sound("assets/sounds/move-check.mp3")
+        self.move_illegal_sound = pygame.mixer.Sound("assets/sounds/illegal.mp3")
+        self.capture_sound = pygame.mixer.Sound("assets/sounds/capture.mp3")
+
+
 
     def update(self):
         """

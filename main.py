@@ -17,7 +17,7 @@ game = Game(screen)
 display_current_player(game)
 bord = draw_bord(screen)
 selected_square = None
-
+game.game_start_sound.play()
 while run:
 
 
@@ -32,6 +32,7 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
         if event.type == pygame.MOUSEBUTTONUP:
             if selected_square is None:
                 selected_square = is_select(game, event)
