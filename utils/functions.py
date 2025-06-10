@@ -278,28 +278,28 @@ def king_pos_simu(bord,color):
 
 
 
-def is_check(game, color,copy = None):
-    if copy is None:
-        pos = king_pos(game.bord,color)
-        pos_xy = chess_to_xy(pos)
-        top_left_x = pos_xy[0] - CASE_SIZE // 2
-        top_left_y = pos_xy[1] - CASE_SIZE // 2
-        if pos is None:
-            return False
-        # Couleur de l'adversaire (celui qui peut mettre en échec)
-        adversaire_color = -color
-        for y in range(8):
-            for x in range(8):
-                piece = game.bord[y][x]
-                if piece is not None and piece.color == adversaire_color:
-                    #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
-                    #print(f"Testing move from ({x},{y}) to king at {pos}")
-                    if is_legal_move(game, x, y, pos[0], pos[1],True):
-                        pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                        draw_move_arrow(game.screen,(x,y),pos)
-                        #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
-                        return True
+def is_check(game, color):
+
+    pos = king_pos(game.bord,color)
+    pos_xy = chess_to_xy(pos)
+    top_left_x = pos_xy[0] - CASE_SIZE // 2
+    top_left_y = pos_xy[1] - CASE_SIZE // 2
+    if pos is None:
         return False
+    # Couleur de l'adversaire (celui qui peut mettre en échec)
+    adversaire_color = -color
+    for y in range(8):
+        for x in range(8):
+            piece = game.bord[y][x]
+            if piece is not None and piece.color == adversaire_color:
+                #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
+                #print(f"Testing move from ({x},{y}) to king at {pos}")
+                if is_legal_move(game, x, y, pos[0], pos[1],True):
+                    pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
+                    draw_move_arrow(game.screen,(x,y),pos)
+                    print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
+                    return True
+    return False
 
 
 def is_check_simu(bord,color):
@@ -452,10 +452,13 @@ def move(game, original_x, original_y, des_x, des_y):
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
-    draw_bord(game.screen)
-    game.check = is_check(game,-game.turn)
-    game.switch_turn()
     game.update()
+    draw_bord(game.screen)
+    game.bord[des_y][des_x].promotion()
+    game.check = is_check(game, -game.turn)
+    game.switch_turn()
+
+
     return COLUMNS[des_x]+ROWS[des_y]
 
 
@@ -464,6 +467,8 @@ def move_simu(bord,o_x,o_y,d_x,d_y):
     piece = bord[o_y][o_x]
     bord[d_y][d_x] = piece
     bord[o_y][o_x] = None
+
+
 
 
 

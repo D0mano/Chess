@@ -23,6 +23,39 @@ class Pieces:
         self.y = y
         self.path = "pieces_2"
 
+    def promotion(self):
+        if self.type_piece == PAWN and self.color == WHITE and self.y == 0:
+            self._promote_to_queen()
+            return True
+        elif self.type_piece == PAWN and self.color == BLACK and self.y == 7:
+            self._promote_to_queen()
+            return True
+
+        return False
+
+    def _promote_to_queen(self):
+        self.__class__ = Queen
+        self.type_piece = QUEEN
+
+        if self.color == WHITE:
+            self.image = pygame.image.load(f"assets/{self.path}/white-queen.png")
+
+        else:
+            self.image = pygame.image.load(f"assets/{self.path}/black-queen.png")
+        self.image = pygame.transform.smoothscale(self.image, (SIZE_PIECES, SIZE_PIECES))
+
+        self.movement = QUEEN_DIRECTION
+        self.movement_type = SLIDING
+
+        self.rect = self.image.get_rect(center=(chess_to_xy((self.x, self.y))))
+
+
+
+
+
+
+
+
 
 class Pawn(Pieces):
     def __init__(self,color,x,y,type_piece):
