@@ -42,7 +42,7 @@ def draw_bord(screen):
     :param screen: Represent the surface where we draw the bord
     """
     color = GREEN_BORD
-    pygame.draw.rect(screen, COULEUR_TEXTE,
+    pygame.draw.rect(screen, TEXT_COLOR,
                      (OFFSET_PLATEAU_X - 25, OFFSET_PLATEAU_Y - 25, BORD_WIDTH + 50, BORD_HEIGHT + 50))
 
     pygame.draw.rect(screen, color[0], (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
@@ -178,13 +178,16 @@ def show_possible_move(game,pos):
 
     for y in range(8):
         for x in range(8):
-            if is_legal_move(game,orig_x,orig_y,x,y) and is_safe_move(game,orig_x,orig_y,x,y):
+            if is_legal_move(game,orig_x,orig_y,x,y) and is_safe_move(game,orig_x,orig_y,x,y,game.turn):
                 pos_2 = chess_to_xy((x, y))
                 top_left_x = pos_2[0] - CASE_SIZE // 2
                 top_left_y = pos_2[1] - CASE_SIZE // 2
                 circle_surf = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
                 pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (40,40), 10)
                 game.screen.blit(circle_surf,(top_left_x,top_left_y))
+
+
+
 
 
 def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y,copy = None):
@@ -373,7 +376,7 @@ def draw_arrow_filled(surface, color, start_pos, end_pos, arrow_width=5, arrow_h
     pygame.draw.polygon(surface, color, head_points)
 
 
-def draw_move_arrow(screen, start_pos, end_pos, color=POSSIBLE_MOUV):
+def draw_move_arrow(screen, start_pos, end_pos, color=POSSIBLE_MOVE):
     """
     Draw an arrow to show possible move
     :param screen: The surface to draw on
@@ -386,10 +389,10 @@ def draw_move_arrow(screen, start_pos, end_pos, color=POSSIBLE_MOUV):
     draw_arrow_filled(screen, color, start_pixel, end_pixel, arrow_width=4, arrow_head_size=12)
 
 
-def is_safe_move(game, original_x, original_y, des_x, des_y):
+def is_safe_move(game, original_x, original_y, des_x, des_y,color):
     game.bord_copy = game.copy()
     move_simu(game.bord_copy,original_x,original_y,des_x,des_y)
-    return not is_check_simu(game.bord_copy,game.turn)
+    return not is_check_simu(game.bord_copy,color)
 
 
 def is_select(game,event):
@@ -400,7 +403,10 @@ def is_select(game,event):
     :param event: The event used to recover the coordinates
     :return: The position of the selected case
     """
+
     pos = chess_to_xy(xy_to_chess(event.pos))
+    if pos is None:
+        return
     top_left_x = pos[0] - CASE_SIZE // 2
     top_left_y = pos[1] - CASE_SIZE // 2
     for y in range(8):
@@ -443,7 +449,7 @@ def move(game, original_x, original_y, des_x, des_y):
         game.move_illegal_sound.play()
         return
 
-    if not is_safe_move(game,original_x, original_y, des_x, des_y):
+    if not is_safe_move(game,original_x, original_y, des_x, des_y,game.turn):
         draw_bord(game.screen)
         game.move_illegal_sound.play()
         return
@@ -451,6 +457,7 @@ def move(game, original_x, original_y, des_x, des_y):
     capture = False
     if game.bord[des_y][des_x] is not None:
         capture = True
+
     game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
@@ -458,9 +465,14 @@ def move(game, original_x, original_y, des_x, des_y):
     game.update()
     draw_bord(game.screen)
     game.bord[des_y][des_x].promotion()
-    game.check = is_check(game, -game.turn)
     game.switch_turn()
-    if game.check:
+    game.check = is_check(game, game.turn)
+    checkmate = game.is_checkmate(game.turn)
+    stalemate = game.is_stalemate(game.turn)
+
+    if checkmate:
+        game.game_end_sound.play()
+    elif game.check:
         game.move_check_sound.play()
     elif capture:
         game.capture_sound.play()

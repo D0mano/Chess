@@ -1,6 +1,6 @@
 from pygame import RESIZABLE
 
-from classes.interface import display_current_player
+from classes.interface import display_current_player, display_timer
 from utils.functions import *
 from classes.game import Game
 
@@ -16,11 +16,15 @@ run = True
 game = Game(screen)
 display_current_player(game)
 bord = draw_bord(screen)
+clock = pygame.time.Clock()
 selected_square = None
 game.game_start_sound.play()
+game.set_time(TEN_MIN)
 while run:
+    dt = clock.tick(30)/1000
 
-
+    display_timer(game)
+    game.decrement_time(game.turn,dt)
 
 
     for i in range(len(game.bord)):

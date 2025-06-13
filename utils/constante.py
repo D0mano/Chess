@@ -36,11 +36,12 @@ SELECTION_COLOR_3 = (150,150,150,150)
 SELECTION_COLOR_4 = (215,224,98,180)
 
 COLOR_CHECK = (255, 107, 107)  # #FF6B6B - Roi en échec
-POSSIBLE_MOUV = (100, 200, 100, 100)  # Vert transparent
+POSSIBLE_MOVE = (100, 200, 100, 100)  # Vert transparent
 
 # Couleurs du texte
-COULEUR_TEXTE = (255, 255, 255)  # Blanc
-COULEUR_TEXTE_NOIR = (0, 0, 0)  # Noir
+TEXT_COLOR = (255, 255, 255)  # White
+GRAY_TEXT_COLOR = (100, 100, 100)  # Gray
+BLACK_TEXT_COLOR = (0, 0, 0)  # Black
 
 # === TYPES DE PIÈCES ===
 # Constantes pour identifier les pièces
@@ -111,6 +112,26 @@ PLATEAU_INITIAL = [
      (WHITE, KING), (WHITE, BISHOP), (WHITE, KNIGHT), (WHITE, ROOK)]
 ]
 
+PLATEAU_NULL = [
+    # 8 (0)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, (BLACK, KING)],
+    # 7 (1)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    # 6 (2)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    # 5 (3)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    # 4 (4)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    # 3 (5)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,(WHITE, QUEEN), EMPTY],
+    # 2 (6)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    # 1 (7)
+    [(WHITE, KING), EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY]
+]
+
+
 # === COORDONNÉES D'ÉCHIQUIER ===
 # Conversion entre indices de tableau et notation échiquéenne
 COLUMNS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -166,3 +187,16 @@ MOVEMENT = {
 #====== Piece type ========#
 JUMPING = 1
 SLIDING = 0
+
+#========== TIME CONSTANT ==========#
+
+FIVE_MIN = 300
+
+TEN_MIN = 600
+
+FIFTEENTH_MIN = FIVE_MIN + TEN_MIN
+
+TWENTY_MIN = 2*TEN_MIN
+
+ONE_HOUR = 3600
+

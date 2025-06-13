@@ -2,7 +2,7 @@ from utils.functions import *
 
 
 class Pieces:
-    def __new__(cls, color = int, x = int, y = int, type_piece = int):
+    def __new__(cls,game, color = int, x = int, y = int, type_piece = int):
         if type_piece == PAWN:
             return super().__new__(Pawn)
         elif type_piece == KNIGHT:
@@ -15,13 +15,15 @@ class Pieces:
             return super().__new__(King)
         elif type_piece == QUEEN:
             return super().__new__(Queen)
-    def __init__(self,color,x,y,type_piece):
+    def __init__(self,game,color,x,y,type_piece):
+        self.game = game
         self.color = color
         self.type_piece = type_piece
         self.nb_move = 0
         self.x = x
         self.y = y
-        self.path = "pieces_2"
+        self.nb_possible_move = 0
+        self.path = "pieces"
 
     def promotion(self):
         if self.type_piece == PAWN and self.color == WHITE and self.y == 0:
@@ -49,6 +51,21 @@ class Pieces:
 
         self.rect = self.image.get_rect(center=(chess_to_xy((self.x, self.y))))
 
+    def count_possible_move(self):
+        nb_possible_move = 0
+        for y in range(8):
+            for x in range(8):
+                legal = is_legal_move(self.game, self.x, self.y, x, y,True)
+                safe = is_safe_move(self.game, self.x, self.y, x, y,self.color)
+                if legal and safe:
+                    nb_possible_move += 1
+        return nb_possible_move
+
+
+
+    def reinitialise_possible_move(self):
+        self.nb_possible_move = 0
+
 
 
 
@@ -58,8 +75,9 @@ class Pieces:
 
 
 class Pawn(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == WHITE :
             self.image = pygame.image.load(f"assets/{self.path}/white-pawn.png").convert_alpha()
             self.movement = DIRECTIONS_WHITE_PAWN
@@ -80,8 +98,9 @@ class Pawn(Pieces):
 
 
 class Knight(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-knight.png").convert_alpha()
         else: self.image = pygame.image.load(f"assets/{self.path}/black-knight.png").convert_alpha()
 
@@ -94,8 +113,9 @@ class Knight(Pieces):
         self.movement_type = JUMPING
 
 class Bishop(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-bishop.png").convert_alpha()
         else: self.image = pygame.image.load(f"assets/{self.path}/black-bishop.png").convert_alpha()
 
@@ -108,8 +128,9 @@ class Bishop(Pieces):
         self.movement_type = SLIDING
 
 class Rook(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == WHITE :self.image = pygame.image.load(f"assets/{self.path}/white-rook.png").convert_alpha()
         else: self.image = pygame.image.load(f"assets/{self.path}/black-rook.png").convert_alpha()
 
@@ -122,8 +143,9 @@ class Rook(Pieces):
         self.movement_type = SLIDING
 
 class Queen(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-queen.png").convert_alpha()
         else: self.image = pygame.image.load(f"assets/{self.path}/black-queen.png").convert_alpha()
 
@@ -136,8 +158,9 @@ class Queen(Pieces):
         self.movement_type = SLIDING
 
 class King(Pieces):
-    def __init__(self,color,x,y,type_piece):
-        super().__init__(color,x,y,type_piece)
+    def __init__(self,game,color,x,y,type_piece):
+        super().__init__(game,color,x,y,type_piece)
+        self.game = game
         if self.color == 1 :self.image = pygame.image.load(f"assets/{self.path}/white-king.png").convert_alpha()
         else: self.image = pygame.image.load(f"assets/{self.path}/black-king.png").convert_alpha()
 
@@ -148,3 +171,4 @@ class King(Pieces):
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = KING_DIRECTION
         self.movement_type = JUMPING
+

@@ -11,12 +11,14 @@ class Game:
         self.screen = screen
         self.bord = []
         self.bord_copy = []
+        self.white_time = None
+        self.black_time = None
         for y in range(len(PLATEAU_INITIAL)):
             row = []
             for x in range(len(PLATEAU_INITIAL[y])):
-                pieces = PLATEAU_INITIAL[y][x]
+                pieces = PLATEAU_NULL[y][x]
                 if pieces != EMPTY:
-                    obj = Pieces(pieces[0], x, y, pieces[1])
+                    obj = Pieces(self,pieces[0], x, y, pieces[1])
                     row.append(obj)
                 else: row.append(None)
             self.bord.append(row)
@@ -64,6 +66,44 @@ class Game:
                     row.append((piece.type_piece,piece.color,piece.movement_type,piece.nb_move))
             copy.append(row)
         return copy
+
+    def is_checkmate(self,color):
+        if not self.check:
+            return False
+        for y in range(8):
+            for x in range(8):
+                piece = self.bord[y][x]
+                if piece is not None and piece.color == color:
+                    if piece.count_possible_move() != 0:
+                        return False
+        print("Checkmate !!")
+        return True
+
+    def is_stalemate(self, color):
+        if  self.check:
+            return False
+        for y in range(8):
+            for x in range(8):
+                piece = self.bord[y][x]
+                if piece is not None and piece.color == color:
+                    if piece.count_possible_move() != 0:
+                        return False
+        print("Stalemate !!")
+        return True
+
+    def set_time(self,time):
+        self.white_time = time
+        self.black_time = time
+
+    def decrement_time(self,color,dt):
+        if color == WHITE:
+            self.white_time -= dt
+        else:
+            self.black_time -= dt
+
+
+
+
 
 
 
