@@ -95,7 +95,12 @@ def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False
         if original.color != game.turn:
             return False
 
-
+    if (des_x,des_y) in QUEEN_SIDE_CASTLE:
+        if original.type_piece == KING:
+            return can_castle_queen_side(game,original.color)
+    elif (des_x,des_y) in KING_SIDE_CASTLE:
+        if original.type_piece == KING:
+            return can_castle_king_side(game,original.color)
 
     valid_direction =  False
     if original.type_piece != PAWN:
@@ -187,38 +192,34 @@ def show_possible_move(game,pos):
                 game.screen.blit(circle_surf,(top_left_x,top_left_y))
 
 
+def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
+    original = game.bord[orig_y][orig_x]
+    destination = game.bord[des_y][des_x]
+    # Computation of the distance
+    d_x = des_x - orig_x
+    d_y = des_y - orig_y
+    if destination is not None:
+        if (d_x, d_y) in original.movement_2:
+            return True
+    if original.nb_move == 0:
 
+        valid_direction = (d_x, d_y) in original.movement_1
+    else:
+        valid_direction = (d_x, d_y) in original.movement
 
-
-def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y,copy = None):
-    if copy is None:
-        original = game.bord[orig_y][orig_x]
-        destination = game.bord[des_y][des_x]
-        # Computation of the distance
-        d_x = des_x - orig_x
-        d_y = des_y - orig_y
-        if destination is not None:
-            if (d_x, d_y) in original.movement_2:
-                return True
-        if original.nb_move == 0:
-
-            valid_direction = (d_x, d_y) in original.movement_1
-        else:
-            valid_direction = (d_x, d_y) in original.movement
-
-        if valid_direction:  # We verify that there is not piece in the way
-            step_x = (d_x // abs(d_x)) if d_x != 0 else 0
-            step_y = (d_y // abs(d_y)) if d_y != 0 else 0
-            x, y = orig_x + step_x, orig_y + step_y
-            while (x, y) != (des_x, des_y):
-                if game.bord[y][x] is not None:
-                    return False
-                x += step_x
-                y += step_y
-        if destination is None:
-            if valid_direction:
-                return True
-            return False
+    if valid_direction:  # We verify that there is not piece in the way
+        step_x = (d_x // abs(d_x)) if d_x != 0 else 0
+        step_y = (d_y // abs(d_y)) if d_y != 0 else 0
+        x, y = orig_x + step_x, orig_y + step_y
+        while (x, y) != (des_x, des_y):
+            if game.bord[y][x] is not None:
+                return False
+            x += step_x
+            y += step_y
+    if destination is None:
+        if valid_direction:
+            return True
+        return False
 
 
 def is_legal_move_pawn_simu(bord,o_x,o_y,d_x,d_y):
@@ -453,11 +454,32 @@ def move(game, original_x, original_y, des_x, des_y):
         game.move_illegal_sound.play()
         return
 
+
+
+
     capture = False
     if game.bord[des_y][des_x] is not None:
         capture = True
+
     game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
+    if (des_x, des_y) in QUEEN_SIDE_CASTLE and piece.type_piece == KING :
+        movement = execute_castle(game, piece.color, False)
+        game.update()
+        draw_bord(game.screen)
+        game.switch_turn()
+        game.castle_sound.play()
+        return movement
+
+    elif (des_x, des_y) in KING_SIDE_CASTLE:
+        if piece.type_piece == KING:
+            movement = execute_castle(game, piece.color, True)
+            game.update()
+            draw_bord(game.screen)
+            game.switch_turn()
+            game.castle_sound.play()
+            return movement
+
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     game.update()
@@ -485,6 +507,7 @@ def move_simu(bord,o_x,o_y,d_x,d_y):
     piece = bord[o_y][o_x]
     bord[d_y][d_x] = piece
     bord[o_y][o_x] = None
+
 
 def algebraic_notation( original_x, des_x, des_y, capture, check, checkmate, type_piece,promotion):
     if capture:
@@ -515,12 +538,13 @@ def algebraic_notation( original_x, des_x, des_y, capture, check, checkmate, typ
             notation += "+"
         return notation
 
+
 def create_pgn(list_coup,color,game):
     with open("game_save.txt","w") as file:
         for i in range(len(list_coup)):
             file.write(f"{i+1}. ")
-            for move in list_coup[i]:
-                file.write(f"{move} ")
+            for movement in list_coup[i]:
+                file.write(f"{movement} ")
         if color == WHITE and game.checkmate:
             file.write("1-0")
         elif color == BLACK and game.checkmate:
@@ -529,6 +553,106 @@ def create_pgn(list_coup,color,game):
             file.write("1/2-1/2")
         else:
             file.write("???")
+
+
+def can_castle_king_side(game, color):
+    """
+    Vérify if the king side castle is possible
+    """
+    king_x, king_row = king_pos(game.bord,color)
+    rook_x = 7
+
+    # We verify is the king and the rook didn't move
+
+    king = game.bord[king_row][king_x]
+    rook = game.bord[king_row][rook_x]
+
+    if  king.color != color or king.nb_move > 0:
+        return False
+    if rook is None or rook.type_piece != ROOK or rook.color != color or rook.nb_move > 0:
+        return False
+
+    # Check that the squares between the king and the rook are empty
+    for x in range(5, 7):
+        if game.bord[king_row][x] is not None:
+            return False
+
+    # Check that the king is not in check and does not pass through an attacked square.
+    if game.check:
+        return False
+
+    # Simulate the king's movement square by square
+    for x in range(4, 7):
+        if not is_safe_move(game, king_x, king_row, x, king_row, color):
+            return False
+
+    return True
+
+
+def can_castle_queen_side(game, color):
+    """
+    Vérify if the king side castle is possible
+    """
+    king_x, king_row = king_pos(game.bord,color)
+    rook_x =  0
+
+    # We verify is the king and the rook didn't move
+
+    king = game.bord[king_row][king_x]
+    rook = game.bord[king_row][rook_x]
+
+    if  king.color != color or king.nb_move > 0:
+        return False
+    if rook is None or rook.type_piece != ROOK or rook.color != color or rook.nb_move > 0:
+        return False
+
+    # Check that the squares between the king and the rook are empty
+
+    for x in range(1, 4):
+        if game.bord[king_row][x] is not None:
+            return False
+
+    # Check that the king is not in check and does not pass through an attacked square.
+
+    if game.check:
+        return False
+
+    # Simulate the king's movement square by square
+
+    for x in range(4, 1, -1):
+        if not is_safe_move(game, king_x, king_row, x, king_row, color):
+            return False
+
+    return True
+
+
+def execute_castle(game, color, king_side=True):
+    """
+    Exécute le roque
+    """
+    king_row = 7 if color == WHITE else 0
+
+    if king_side:
+        # Roque côté roi
+        king_new_x, rook_old_x, rook_new_x = 6, 7, 5
+    else:
+        # Roque côté dame
+        king_new_x, rook_old_x, rook_new_x = 2, 0, 3
+
+    # Déplacer le roi
+    king = game.bord[king_row][4]
+    game.bord[king_row][king_new_x] = king
+    game.bord[king_row][4] = None
+    king.nb_move += 1
+
+    # Déplacer la tour
+    rook = game.bord[king_row][rook_old_x]
+    game.bord[king_row][rook_new_x] = rook
+    game.bord[king_row][rook_old_x] = None
+    rook.nb_move += 1
+
+    return "O-O" if king_side else "O-O-O"
+
 
 
 

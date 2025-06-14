@@ -46,20 +46,19 @@ while run:
                 start_x,start_y = selected_square[0],selected_square[1]
                 if xy_to_chess(event.pos) is not None:
                     end_x,end_y = xy_to_chess(event.pos)
+                    print(can_castle_queen_side(game, game.turn))
                     movement = move(game, start_x, start_y, end_x, end_y)
-                    if game.turn == BLACK:
-                        coup.append(movement)
-
-                    else:
-                        coup.append(movement)
-                        list_coup.append(coup)
-                        coup = []
-
 
 
 
                     if movement is not None:
-                       print(movement)
+                        if game.turn == BLACK:
+                            coup.append(movement)
+
+                        else:
+                            coup.append(movement)
+                            list_coup.append(coup)
+                            coup = []
 
                 selected_square = None
         if event.type == pygame.KEYDOWN:
@@ -67,7 +66,7 @@ while run:
                 run = False
 
     pygame.display.flip()
-if coup != []:
+if coup:
     list_coup.append(coup)
 create_pgn(list_coup,-game.turn,game)
 

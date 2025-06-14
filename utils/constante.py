@@ -178,6 +178,9 @@ BISHOP_DIRECTION = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Diagonales
 QUEEN_DIRECTION = ROOK_DIRECTION + BISHOP_DIRECTION
 KING_DIRECTION = QUEEN_DIRECTION  # Même directions mais 1 case seulement
 
+QUEEN_SIDE_CASTLE = [(2,0),(2,7)]
+KING_SIDE_CASTLE = [(6,0),(6,7)]
+
 # Mouvements du cavalier (en L)
 KNIGHT_DIRECTION = [
     (2, 1), (2, -1), (-2, 1), (-2, -1),

@@ -35,6 +35,7 @@ class Game:
         self.move_check_sound = pygame.mixer.Sound("assets/sounds/move-check.mp3")
         self.move_illegal_sound = pygame.mixer.Sound("assets/sounds/illegal.mp3")
         self.capture_sound = pygame.mixer.Sound("assets/sounds/capture.mp3")
+        self.castle_sound = pygame.mixer.Sound("assets/sounds/castle.mp3")
 
 
 
