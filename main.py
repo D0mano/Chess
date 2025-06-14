@@ -20,6 +20,8 @@ clock = pygame.time.Clock()
 selected_square = None
 game.game_start_sound.play()
 game.set_time(TEN_MIN)
+coup = []
+list_coup = []
 while run:
     dt = clock.tick(30)/1000
 
@@ -45,8 +47,19 @@ while run:
                 if xy_to_chess(event.pos) is not None:
                     end_x,end_y = xy_to_chess(event.pos)
                     movement = move(game, start_x, start_y, end_x, end_y)
-                   # if movement is not None:
-                       # print(movement)
+                    if game.turn == BLACK:
+                        coup.append(movement)
+
+                    else:
+                        coup.append(movement)
+                        list_coup.append(coup)
+                        coup = []
+
+
+
+
+                    if movement is not None:
+                       print(movement)
 
                 selected_square = None
         if event.type == pygame.KEYDOWN:
@@ -54,6 +67,8 @@ while run:
                 run = False
 
     pygame.display.flip()
-
+if coup != []:
+    list_coup.append(coup)
+create_pgn(list_coup,-game.turn,game)
 
 pygame.quit()

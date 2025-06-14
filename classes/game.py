@@ -16,7 +16,7 @@ class Game:
         for y in range(len(PLATEAU_INITIAL)):
             row = []
             for x in range(len(PLATEAU_INITIAL[y])):
-                pieces = PLATEAU_NULL[y][x]
+                pieces = PLATEAU_INITIAL[y][x]
                 if pieces != EMPTY:
                     obj = Pieces(self,pieces[0], x, y, pieces[1])
                     row.append(obj)
@@ -25,6 +25,10 @@ class Game:
         self.turn = WHITE
         self.nb_turn = 1
         self.check = None
+        self.checkmate = None
+        self.stalemate = None
+        self.white_roque = True
+        self.black_roque = True
         self.game_start_sound = pygame.mixer.Sound(f"assets/sounds/game-start.mp3")
         self.game_end_sound = pygame.mixer.Sound(f"assets/sounds/game-end.mp3")
         self.move_self_sound = pygame.mixer.Sound(f"assets/sounds/move-self.mp3")

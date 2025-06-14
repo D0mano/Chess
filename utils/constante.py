@@ -73,6 +73,13 @@ PIECES_UNICODE = {
     (BLACK, KNIGHT): '♞',
     (BLACK, PAWN): '♟'
 }
+PIECE_PGN = {
+    KING : "K",
+    QUEEN : "Q",
+    ROOK : "R",
+    BISHOP : "B",
+    KNIGHT : "N"
+}
 
 # === NOMS DES PIÈCES (pour affichage/debug) ===
 PIECES_NAMES = {

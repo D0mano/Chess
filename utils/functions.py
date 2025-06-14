@@ -442,9 +442,8 @@ def move(game, original_x, original_y, des_x, des_y):
     :param des_y: y-coordinate of the destination of the piece
     :return: A string describing the move
     """
-    legal = is_legal_move(game, original_x, original_y, des_x, des_y)
 
-    if not legal:
+    if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         game.move_illegal_sound.play()
         return
@@ -457,20 +456,19 @@ def move(game, original_x, original_y, des_x, des_y):
     capture = False
     if game.bord[des_y][des_x] is not None:
         capture = True
-
     game.bord[original_y][original_x].nb_move += 1
     piece = game.bord[original_y][original_x]
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     game.update()
     draw_bord(game.screen)
-    game.bord[des_y][des_x].promotion()
+    promotion = game.bord[des_y][des_x].promotion()
     game.switch_turn()
     game.check = is_check(game, game.turn)
-    checkmate = game.is_checkmate(game.turn)
+    game.checkmate = game.is_checkmate(game.turn)
     stalemate = game.is_stalemate(game.turn)
 
-    if checkmate:
+    if game.checkmate:
         game.game_end_sound.play()
     elif game.check:
         game.move_check_sound.play()
@@ -479,7 +477,7 @@ def move(game, original_x, original_y, des_x, des_y):
     else:
         game.move_self_sound.play()
 
-    return COLUMNS[des_x]+ROWS[des_y]
+    return algebraic_notation(original_x,des_x,des_y,capture,game.check,game.checkmate,piece.type_piece,promotion)
 
 
 def move_simu(bord,o_x,o_y,d_x,d_y):
@@ -487,6 +485,58 @@ def move_simu(bord,o_x,o_y,d_x,d_y):
     piece = bord[o_y][o_x]
     bord[d_y][d_x] = piece
     bord[o_y][o_x] = None
+
+def algebraic_notation( original_x, des_x, des_y, capture, check, checkmate, type_piece,promotion):
+    if capture:
+        if promotion:
+            notation = COLUMNS[original_x] + "x" + COLUMNS[des_x] + ROWS[des_y] + "=" + PIECE_PGN[type_piece]
+
+        elif type_piece == PAWN:
+            notation = COLUMNS[original_x] + "x" + COLUMNS[des_x] + ROWS[des_y]
+
+        else:
+            notation = PIECE_PGN[type_piece] + "x" + COLUMNS[des_x] + ROWS[des_y]
+        if checkmate:
+            notation += "#"
+        elif check:
+            notation += "+"
+        return notation
+    else:
+        if promotion:
+            notation = COLUMNS[des_x] + ROWS[des_y] + "=" + PIECE_PGN[type_piece]
+        elif type_piece == PAWN:
+            notation = COLUMNS[des_x] + ROWS[des_y]
+        else:
+            notation = PIECE_PGN[type_piece] + COLUMNS[des_x] + ROWS[des_y]
+
+        if checkmate:
+            notation += "#"
+        elif check:
+            notation += "+"
+        return notation
+
+def create_pgn(list_coup,color,game):
+    with open("game_save.txt","w") as file:
+        for i in range(len(list_coup)):
+            file.write(f"{i+1}. ")
+            for move in list_coup[i]:
+                file.write(f"{move} ")
+        if color == WHITE and game.checkmate:
+            file.write("1-0")
+        elif color == BLACK and game.checkmate:
+            file.write("0-1")
+        elif game.stalemate:
+            file.write("1/2-1/2")
+        else:
+            file.write("???")
+
+
+
+
+
+
+
+
 
 
 
