@@ -188,8 +188,8 @@ def show_possible_move(game,pos):
                 top_left_x = pos_2[0] - CASE_SIZE // 2
                 top_left_y = pos_2[1] - CASE_SIZE // 2
                 circle_surf = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
-                pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (40,40), 10)
-                game.screen.blit(circle_surf,(top_left_x,top_left_y))
+                pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (CASE_SIZE/2,CASE_SIZE/2), 10)
+                game.screen.blit(circle_surf, (top_left_x, top_left_y))
 
 
 def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
@@ -299,8 +299,8 @@ def is_check(game, color):
                 #print(f"We verify the piece {PIECES_NAMES[piece.type_piece]} {piece.color}")
                 #print(f"Testing move from ({x},{y}) to king at {pos}")
                 if is_legal_move(game, x, y, pos[0], pos[1],True):
-                    pygame.draw.rect(game.screen,COLOR_CHECK,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    draw_move_arrow(game.screen,(x,y),pos)
+                    pygame.draw.rect(game.screen, COLOR_CHECK, (top_left_x, top_left_y, CASE_SIZE, CASE_SIZE))
+                    draw_move_arrow(game.screen, (x, y), pos)
                     #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
                     return True
     return False
@@ -423,7 +423,7 @@ def is_select(game,event):
                 if game.bord[y][x].rect.collidepoint(event.pos):
                     highlight = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
                     highlight.fill(SELECTION_COLOR_4)
-                    game.screen.blit(highlight,(top_left_x,top_left_y))
+                    game.screen.blit(highlight, (top_left_x, top_left_y))
                     #pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
                     #print(f"Case selected en {x},{y}")
                     selected_case[y][x]= True
@@ -485,6 +485,7 @@ def move(game, original_x, original_y, des_x, des_y):
     game.update()
     draw_bord(game.screen)
     promotion = game.bord[des_y][des_x].promotion()
+    game.increment(game.turn,game.increment_time)
     game.switch_turn()
     game.check = is_check(game, game.turn)
     game.checkmate = game.is_checkmate(game.turn)
@@ -596,7 +597,7 @@ def can_castle_queen_side(game, color):
     king_x, king_row = king_pos(game.bord,color)
     rook_x =  0
 
-    # We verify is the king and the rook didn't move
+    # We verify if the king and the rook didn't move
 
     king = game.bord[king_row][king_x]
     rook = game.bord[king_row][rook_x]
@@ -652,6 +653,8 @@ def execute_castle(game, color, king_side=True):
     rook.nb_move += 1
 
     return "O-O" if king_side else "O-O-O"
+
+
 
 
 

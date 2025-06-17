@@ -1,27 +1,20 @@
-from utils.constante import *
-import pygame
+
 from classes.pieces import Pieces
-from utils.functions import chess_to_xy
-from classes.interface import display_current_player
+from utils.functions import *
+from classes.interface import *
 
 
 class Game:
-    def __init__(self,screen):
+    def __init__(self):
+        self.running = True
         self.is_playing = False
-        self.screen = screen
+        self.screen = None
         self.bord = []
         self.bord_copy = []
+        self.is_increment = False
+        self.increment_time = 0
         self.white_time = None
         self.black_time = None
-        for y in range(len(PLATEAU_INITIAL)):
-            row = []
-            for x in range(len(PLATEAU_INITIAL[y])):
-                pieces = PLATEAU_INITIAL[y][x]
-                if pieces != EMPTY:
-                    obj = Pieces(self,pieces[0], x, y, pieces[1])
-                    row.append(obj)
-                else: row.append(None)
-            self.bord.append(row)
         self.turn = WHITE
         self.nb_turn = 1
         self.check = None
@@ -38,6 +31,26 @@ class Game:
         self.castle_sound = pygame.mixer.Sound("assets/sounds/castle.mp3")
 
 
+    def set_screen(self,screen):
+        self.screen = screen
+
+    def set_bord(self,bord=PLATEAU_INITIAL):
+        for y in range(len(bord)):
+            row = []
+            for x in range(len(bord[y])):
+                pieces = bord[y][x]
+                if pieces != EMPTY:
+                    obj = Pieces(self,pieces[0], x, y, pieces[1])
+                    row.append(obj)
+                else: row.append(None)
+            self.bord.append(row)
+
+    def reinitialise_game(self):
+        self.bord = []
+        self.turn = WHITE
+        self.nb_turn = 1
+        self.white_roque = True
+        self.black_roque = True
 
     def update(self):
         """
@@ -100,11 +113,85 @@ class Game:
         self.white_time = time
         self.black_time = time
 
+    def set_increment_time(self,time):
+        self.increment_time = time
+
     def decrement_time(self,color,dt):
         if color == WHITE:
             self.white_time -= dt
         else:
             self.black_time -= dt
+
+    def increment(self,color,time):
+        if color == WHITE:
+            self.white_time += time
+        else:
+            self.black_time += time
+
+    def set_mode(self, time, increment_time=0):
+        self.set_time(time)
+        self.set_increment_time(increment_time)
+
+
+
+
+    def star_game(self):
+
+
+        self.screen.fill(BACKGROUND_COLOR)
+        display_current_player(self)
+        draw_bord(self.screen)
+        clock = pygame.time.Clock()
+        selected_square = None
+        self.game_start_sound.play()
+        coup = []
+        list_coup = []
+        while self.is_playing:
+            dt = clock.tick(30) / 1000
+
+            display_timer(self)
+            self.decrement_time(self.turn, dt)
+
+            for i in range(len(self.bord)):
+                for piece in self.bord[i]:
+                    if piece is not None:
+                        self.screen.blit(piece.image, piece.rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.is_playing = False
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if selected_square is None:
+                        selected_square = is_select(self, event)
+                    else:
+                        start_x, start_y = selected_square[0], selected_square[1]
+                        if xy_to_chess(event.pos) is not None:
+                            end_x, end_y = xy_to_chess(event.pos)
+                            print(can_castle_queen_side(self, self.turn))
+                            movement = move(self, start_x, start_y, end_x, end_y)
+
+                            if movement is not None:
+                                if self.turn == BLACK:
+                                    coup.append(movement)
+
+                                else:
+                                    coup.append(movement)
+                                    list_coup.append(coup)
+                                    coup = []
+
+                        selected_square = None
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.is_playing = False
+                        self.reinitialise_game()
+
+            pygame.display.flip()
+        if coup:
+            list_coup.append(coup)
+        create_pgn(list_coup, -self.turn, self)
+
+
 
 
 
