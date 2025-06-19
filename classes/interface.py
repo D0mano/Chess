@@ -25,31 +25,55 @@ def display_timer(game):
     minute_2 = game.black_time // 60
     sec_2 = game.black_time % 60
 
+    padding_x1 = 20
+    padding_y1 = 10
+
     if game.turn == WHITE:
         text_1 = font.render(f"White:{int(minute)}:{int(sec)}", True, TEXT_COLOR)
         rect_1 = text_1.get_rect(
             center=((OFFSET_PLATEAU_X + BORD_WIDTH) + OFFSET_PLATEAU_X / 2,(GAME_WINDOW_HEIGHT * (3 / 4))))
+        surface_rect_1 = pygame.Rect(
+            rect_1.left - padding_x1,
+            rect_1.top - padding_y1,
+            rect_1.width + 2 * padding_x1,
+            rect_1.height + 2 * padding_y1)
 
         text_2 = font.render(f"Black:{int(minute_2)}:{int(sec_2)}", True, GRAY_TEXT_COLOR)
         rect_2 = text_2.get_rect(
             center=((OFFSET_PLATEAU_X + BORD_WIDTH) + OFFSET_PLATEAU_X / 2,(GAME_WINDOW_HEIGHT * (1 / 4))))
-        pygame.draw.rect(game.screen, BACKGROUND_COLOR, rect_1)
+
+        surface_rect_2 = pygame.Rect(
+            rect_2.left - padding_x1,
+            rect_2.top - padding_y1,
+            rect_2.width + 2 * padding_x1,
+            rect_2.height + 2 * padding_y1)
+        pygame.draw.rect(game.screen, BACKGROUND_COLOR, surface_rect_1)
         game.screen.blit(text_1, rect_1)
 
-        pygame.draw.rect(game.screen, BACKGROUND_COLOR, rect_2)
+        pygame.draw.rect(game.screen, BACKGROUND_COLOR, surface_rect_2)
         game.screen.blit(text_2, rect_2)
     else:
         text_1 = font.render(f"White:{int(minute)}:{int(sec)}", True, GRAY_TEXT_COLOR)
         rect_1 = text_1.get_rect(
             center=((OFFSET_PLATEAU_X + BORD_WIDTH) + OFFSET_PLATEAU_X / 2, (GAME_WINDOW_HEIGHT * (3 / 4))))
+        surface_rect_1 = pygame.Rect(
+            rect_1.left - padding_x1,
+            rect_1.top - padding_y1,
+            rect_1.width + 2 * padding_x1,
+            rect_1.height + 2 * padding_y1)
 
         text_2 = font.render(f"Black:{int(minute_2)}:{int(sec_2)}", True, TEXT_COLOR)
         rect_2 = text_2.get_rect(
             center=((OFFSET_PLATEAU_X + BORD_WIDTH) + OFFSET_PLATEAU_X / 2, (GAME_WINDOW_HEIGHT * (1 / 4))))
-        pygame.draw.rect(game.screen, BACKGROUND_COLOR, rect_1)
+        surface_rect_2 = pygame.Rect(
+            rect_2.left - padding_x1,
+            rect_2.top - padding_y1,
+            rect_2.width + 2 * padding_x1,
+            rect_2.height + 2 * padding_y1)
+        pygame.draw.rect(game.screen, BACKGROUND_COLOR, surface_rect_1)
         game.screen.blit(text_1, rect_1)
 
-        pygame.draw.rect(game.screen, BACKGROUND_COLOR, rect_2)
+        pygame.draw.rect(game.screen, BACKGROUND_COLOR, surface_rect_2)
         game.screen.blit(text_2, rect_2)
 
 def main_menu(game):
@@ -188,28 +212,39 @@ def mode_selecting(game,screen):
                 if event.key == K_ESCAPE:
                     running = False
             if event.type == pygame.MOUSEBUTTONUP:
+                mode_selected = False
                 for (rect,mode) in all_button:
                     if rect.collidepoint(event.pos):
                         if mode == "1 min":
                             game.set_time(ONE_MIN)
+                            mode_selected = True
                         elif mode == "1 | 1":
                             game.set_mode(ONE_MIN,1)
+                            mode_selected = True
                         elif mode == "2 | 1":
                             game.set_mode(2*ONE_MIN,1)
+                            mode_selected = True
                         elif mode == "3 min":
                             game.set_mode(3*ONE_MIN)
+                            mode_selected = True
                         elif mode == "3 | 2":
                             game.set_mode(3*ONE_MIN,2)
+                            mode_selected = True
                         elif mode == "5 min":
                             game.set_mode(FIVE_MIN)
+                            mode_selected = True
                         elif mode == "10 min":
                             game.set_mode(TEN_MIN)
+                            mode_selected = True
                         elif mode == "15 | 10":
                             game.set_mode(FIFTEENTH_MIN,10)
+                            mode_selected = True
                         elif mode == "30 min":
                             game.set_mode(THIRTY_MIN)
-                game.is_playing = True
-                running = False
+                            mode_selected = True
+                if mode_selected:
+                    game.is_playing = True
+                    running = False
 
         pygame.display.flip()
         clock.tick(60)

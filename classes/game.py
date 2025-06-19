@@ -63,6 +63,8 @@ class Game:
                     self.bord[y][x].rect = self.bord[y][x].image.get_rect(center=(chess_to_xy((x,y))))
                     self.bord[y][x].x = x
                     self.bord[y][x].y = y
+                    self.screen.blit(self.bord[y][x].image, self.bord[y][x].rect)
+
 
     def switch_turn(self):
         self.turn = -self.turn
@@ -117,9 +119,9 @@ class Game:
         self.increment_time = time
 
     def decrement_time(self,color,dt):
-        if color == WHITE:
+        if color == WHITE and self.white_time > 1:
             self.white_time -= dt
-        else:
+        elif color == BLACK and self.black_time > 1:
             self.black_time -= dt
 
     def increment(self,color,time):
@@ -144,31 +146,30 @@ class Game:
         clock = pygame.time.Clock()
         selected_square = None
         self.game_start_sound.play()
+        self.update()
         coup = []
         list_coup = []
         while self.is_playing:
+
             dt = clock.tick(30) / 1000
 
             display_timer(self)
             self.decrement_time(self.turn, dt)
 
-            for i in range(len(self.bord)):
-                for piece in self.bord[i]:
-                    if piece is not None:
-                        self.screen.blit(piece.image, piece.rect)
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.is_playing = False
 
                 if event.type == pygame.MOUSEBUTTONUP:
+                    self.update()
                     if selected_square is None:
                         selected_square = is_select(self, event)
                     else:
                         start_x, start_y = selected_square[0], selected_square[1]
                         if xy_to_chess(event.pos) is not None:
                             end_x, end_y = xy_to_chess(event.pos)
-                            print(can_castle_queen_side(self, self.turn))
                             movement = move(self, start_x, start_y, end_x, end_y)
 
                             if movement is not None:

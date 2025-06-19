@@ -23,14 +23,16 @@ class Pieces:
         self.x = x
         self.y = y
         self.nb_possible_move = 0
-        self.path = "pieces"
+        self.path = "pieces_2"
 
     def promotion(self):
         if self.type_piece == PAWN and self.color == WHITE and self.y == 0:
             self._promote_to_queen()
+            self.game.update()
             return True
         elif self.type_piece == PAWN and self.color == BLACK and self.y == 7:
             self._promote_to_queen()
+            self.game.update()
             return True
 
         return False
@@ -50,6 +52,7 @@ class Pieces:
         self.movement_type = SLIDING
 
         self.rect = self.image.get_rect(center=(chess_to_xy((self.x, self.y))))
+        self.game.update()
 
     def count_possible_move(self):
         nb_possible_move = 0

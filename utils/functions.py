@@ -95,10 +95,10 @@ def is_legal_move(game, original_x, original_y, des_x, des_y,ignore_turn = False
         if original.color != game.turn:
             return False
 
-    if (des_x,des_y) in QUEEN_SIDE_CASTLE:
+    if (des_x,des_y) in QUEEN_SIDE_CASTLE and original.nb_move == 0:
         if original.type_piece == KING:
             return can_castle_queen_side(game,original.color)
-    elif (des_x,des_y) in KING_SIDE_CASTLE:
+    elif (des_x,des_y) in KING_SIDE_CASTLE and original.nb_move == 0:
         if original.type_piece == KING:
             return can_castle_king_side(game,original.color)
 
@@ -300,6 +300,7 @@ def is_check(game, color):
                 #print(f"Testing move from ({x},{y}) to king at {pos}")
                 if is_legal_move(game, x, y, pos[0], pos[1],True):
                     pygame.draw.rect(game.screen, COLOR_CHECK, (top_left_x, top_left_y, CASE_SIZE, CASE_SIZE))
+                    game.update()
                     draw_move_arrow(game.screen, (x, y), pos)
                     #print( f"ÉCHEC ! {PIECES_NAMES[piece.type_piece]} en ({x},{y}) attaque le roi en ({pos[0]},{pos[1]})")
                     return True
@@ -415,6 +416,7 @@ def is_select(game,event):
             if selected_case[y][x]:
                 selected_case[y][x] = False
                 draw_bord(game.screen)
+                game.update()
 
     for y in range(len(game.bord)):
         for x in range(len(game.bord[y])):
@@ -424,12 +426,11 @@ def is_select(game,event):
                     highlight = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
                     highlight.fill(SELECTION_COLOR_4)
                     game.screen.blit(highlight, (top_left_x, top_left_y))
-                    #pygame.draw.rect(game.screen,SELECTION_COLOR,(top_left_x,top_left_y,CASE_SIZE,CASE_SIZE))
-                    #print(f"Case selected en {x},{y}")
                     selected_case[y][x]= True
                     des_x = x
                     des_y = y
                     show_possible_move(game,(des_x,des_y))
+                    game.update()
                     return des_x,des_y
 
 
@@ -447,11 +448,13 @@ def move(game, original_x, original_y, des_x, des_y):
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen)
         game.move_illegal_sound.play()
+        game.update()
         return
 
     if not is_safe_move(game,original_x, original_y, des_x, des_y,game.turn):
         draw_bord(game.screen)
         game.move_illegal_sound.play()
+        game.update()
         return
 
 
@@ -461,35 +464,39 @@ def move(game, original_x, original_y, des_x, des_y):
     if game.bord[des_y][des_x] is not None:
         capture = True
 
-    game.bord[original_y][original_x].nb_move += 1
+
     piece = game.bord[original_y][original_x]
-    if (des_x, des_y) in QUEEN_SIDE_CASTLE and piece.type_piece == KING :
+    if (des_x, des_y) in QUEEN_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
+        piece.nb_move += 1
         movement = execute_castle(game, piece.color, False)
-        game.update()
         draw_bord(game.screen)
+        game.update()
         game.switch_turn()
         game.castle_sound.play()
         return movement
-
-    elif (des_x, des_y) in KING_SIDE_CASTLE:
-        if piece.type_piece == KING:
-            movement = execute_castle(game, piece.color, True)
-            game.update()
-            draw_bord(game.screen)
-            game.switch_turn()
-            game.castle_sound.play()
-            return movement
-
+    elif (des_x, des_y) in KING_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
+        piece.nb_move += 1
+        movement = execute_castle(game, piece.color, True)
+        draw_bord(game.screen)
+        game.update()
+        game.switch_turn()
+        game.castle_sound.play()
+        return movement
+    piece.nb_move += 1
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
-    game.update()
     draw_bord(game.screen)
+    game.update()
     promotion = game.bord[des_y][des_x].promotion()
+    if promotion:
+        game.update()
     game.increment(game.turn,game.increment_time)
     game.switch_turn()
     game.check = is_check(game, game.turn)
     game.checkmate = game.is_checkmate(game.turn)
     stalemate = game.is_stalemate(game.turn)
+
+
 
     if game.checkmate:
         game.game_end_sound.play()
@@ -499,7 +506,6 @@ def move(game, original_x, original_y, des_x, des_y):
         game.capture_sound.play()
     else:
         game.move_self_sound.play()
-
     return algebraic_notation(original_x,des_x,des_y,capture,game.check,game.checkmate,piece.type_piece,promotion)
 
 
@@ -542,18 +548,28 @@ def algebraic_notation( original_x, des_x, des_y, capture, check, checkmate, typ
 
 def create_pgn(list_coup,color,game):
     with open("game_save.txt","w") as file:
+        result = ""
+        if color == WHITE and game.checkmate:
+            result = "1-0"
+        elif color == BLACK and game.checkmate:
+            result = "0-1"
+        elif game.stalemate:
+            result = "1/2-1/2"
+        else:
+            result = "???"
+        file.write(f'[Event ""]\n'
+                   f'[Site ""]\n'
+                   f'[Date ""]\n'
+                   f'[Round ""]\n'
+                   f'[White "Player_1"]\n'
+                   f'[Black "Player_2"]\n'
+                   f'[Result "{result}"]\n'
+                   f'[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq – 0 1"]\n')
         for i in range(len(list_coup)):
             file.write(f"{i+1}. ")
             for movement in list_coup[i]:
                 file.write(f"{movement} ")
-        if color == WHITE and game.checkmate:
-            file.write("1-0")
-        elif color == BLACK and game.checkmate:
-            file.write("0-1")
-        elif game.stalemate:
-            file.write("1/2-1/2")
-        else:
-            file.write("???")
+        file.write(result)
 
 
 def can_castle_king_side(game, color):
