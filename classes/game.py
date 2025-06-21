@@ -10,6 +10,8 @@ class Game:
         self.is_playing = False
         self.screen = None
         self.bord = []
+        self.bord_color = CLASSICAL_BORD
+        self.path = "pieces_2"
         self.bord_copy = []
         self.is_increment = False
         self.increment_time = 0
@@ -51,6 +53,8 @@ class Game:
         self.nb_turn = 1
         self.white_roque = True
         self.black_roque = True
+        self.path = "pieces"
+        self.bord_color = CLASSICAL_BORD
 
     def update(self):
         """
@@ -142,7 +146,7 @@ class Game:
 
         self.screen.fill(BACKGROUND_COLOR)
         display_current_player(self)
-        draw_bord(self.screen)
+        draw_bord(self.screen,self)
         clock = pygame.time.Clock()
         selected_square = None
         self.game_start_sound.play()
@@ -192,6 +196,12 @@ class Game:
             list_coup.append(coup)
         create_pgn(list_coup, -self.turn, self)
 
+
+    def set_bord_color(self,color):
+        self.bord_color = color
+
+    def set_piece(self,path):
+        self.path = path
 
 
 

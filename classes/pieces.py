@@ -23,7 +23,7 @@ class Pieces:
         self.x = x
         self.y = y
         self.nb_possible_move = 0
-        self.path = "pieces_2"
+        self.path = game.path
 
     def promotion(self):
         if self.type_piece == PAWN and self.color == WHITE and self.y == 0:

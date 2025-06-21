@@ -1,5 +1,5 @@
 import pygame.font
-from pygame import K_ESCAPE
+from pygame import K_ESCAPE, MOUSEBUTTONUP
 
 from utils.functions import *
 
@@ -134,8 +134,8 @@ def mode_selecting(game,screen):
     clock = pygame.time.Clock()
 
     # Couleurs
-    DARK_BG = (30, 28, 26)
-    CARD_BG = BACKGROUND_COLOR
+    DARK_BG = BACKGROUND_COLOR
+    CARD_BG = (30, 28, 26)
     TEXT_COLOR = (254, 238, 202)
 
     # Police
@@ -243,13 +243,83 @@ def mode_selecting(game,screen):
                             game.set_mode(THIRTY_MIN)
                             mode_selected = True
                 if mode_selected:
-                    game.is_playing = True
+                    ATH_selecting(game,screen)
                     running = False
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
+
+
+
+def ATH_selecting(game,screen):
+    pygame.init()
+    font = pygame.font.SysFont("impact",60)
+    paths = ["pieces","pieces_2"]
+    bord_colors = [CLASSICAL_BORD,GREEN_BORD,CIEL_BORD]
+
+    running = True
+    piece_index = 0
+    color_index = 0
+    piece = pygame.image.load(f"assets/{paths[piece_index]}/white-pawn.png")
+    text_play = font.render("PLAY", True, (254, 238, 202))
+    text_play_rect = text_play.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT * 4 / 5 ))
+    padding_x1 = 20
+    padding_y1 = 10
+    play_button_rect = pygame.Rect(
+        text_play_rect.left - padding_x1,
+        text_play_rect.top - padding_y1,
+        text_play_rect.width + 2 * padding_x1,
+        text_play_rect.height + 2 * padding_y1
+    )
+
+    while running:
+        piece_rect = piece.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3))
+        screen.fill(BACKGROUND_COLOR)
+        piece = pygame.image.load(f"assets/{paths[piece_index]}/white-pawn.png")
+        bord_rect = draw_bord(screen, game, True, WINDOW_WIDTH // 2 - 56, WINDOW_HEIGHT // 2, 112, 112, 14)
+        screen.blit(piece, piece_rect)
+        pygame.draw.rect(screen, (33, 32, 31), play_button_rect, border_radius=20)
+        screen.blit(text_play,text_play_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+            if event.type == MOUSEBUTTONUP:
+                if bord_rect.collidepoint(event.pos):
+                    if color_index == len(bord_colors)-1:
+                        color_index = 0
+                        game.set_bord_color(bord_colors[color_index])
+                    else:
+                        color_index += 1
+                        game.set_bord_color(bord_colors[color_index])
+                if piece_rect.collidepoint(event.pos):
+                    if piece_index == len(paths)-1:
+                        piece_index = 0
+                        pygame.draw.rect(screen,BACKGROUND_COLOR,piece_rect)
+                        game.set_piece(paths[piece_index])
+                    else:
+                        piece_index += 1
+                        pygame.draw.rect(screen,BACKGROUND_COLOR,piece_rect)
+                        game.set_piece(paths[piece_index])
+                if play_button_rect.collidepoint(event.pos):
+                    running = False
+                    game.is_playing = True
+
+
+
+
+
+
+
+        pygame.display.flip()
+
+
+
+
 
 
 

@@ -36,30 +36,34 @@ def xy_to_chess(pos):
     return
 
 
-def draw_bord(screen):
+def draw_bord(screen,game ,miniature = False,offset_x = OFFSET_PLATEAU_X,offset_y = OFFSET_PLATEAU_Y,bord_width = BORD_WIDTH,bord_height = BORD_HEIGHT , case_size = CASE_SIZE):
     """
     Draw the chess bord with the specific dimension
     :param screen: Represent the surface where we draw the bord
+    :param game: Represent the game instance
     """
-    color = GREEN_BORD
-    pygame.draw.rect(screen, TEXT_COLOR,
-                     (OFFSET_PLATEAU_X - 25, OFFSET_PLATEAU_Y - 25, BORD_WIDTH + 50, BORD_HEIGHT + 50))
+    color = game.bord_color
 
-    pygame.draw.rect(screen, color[0], (OFFSET_PLATEAU_X,OFFSET_PLATEAU_Y,BORD_WIDTH,BORD_HEIGHT))
+    if not miniature:
+        pygame.draw.rect(screen, TEXT_COLOR,
+                         (offset_x - 25, offset_y - 25, bord_width + 50, bord_height + 50))
+
+    pygame.draw.rect(screen, color[0], (offset_x,offset_y,bord_width,bord_height))
     for row in range(8):
         for col in range(8):
             if (row + col) % 2 != 0:
-                pygame.draw.rect(screen, color[1], (OFFSET_PLATEAU_X + row * CASE_SIZE, OFFSET_PLATEAU_Y + col * CASE_SIZE, CASE_SIZE, CASE_SIZE))
+                pygame.draw.rect(screen, color[1], (offset_x + row * case_size, offset_y + col * case_size, case_size, case_size))
     font= pygame.font.Font(None,20)
-    for i in range(8):
-        text_number = font.render(ROWS[i],True,(150,150,150))
-        rect_number = text_number.get_rect(center=(OFFSET_PLATEAU_X-15,(OFFSET_PLATEAU_Y+CASE_SIZE//2)+(i*CASE_SIZE)))
-        screen.blit(text_number,rect_number)
-        text_letter = font.render(COLUMNS[i],True,(150,150,150))
-        rect_letter = text_letter.get_rect(center=((OFFSET_PLATEAU_X+CASE_SIZE//2)+(i*CASE_SIZE),(OFFSET_PLATEAU_Y + 8*CASE_SIZE) +10))
-        screen.blit(text_letter,rect_letter)
+    if not miniature:
+        for i in range(8):
+            text_number = font.render(ROWS[i],True,(150,150,150))
+            rect_number = text_number.get_rect(center=(offset_x-15,(offset_y+case_size//2)+(i*case_size)))
+            screen.blit(text_number,rect_number)
+            text_letter = font.render(COLUMNS[i],True,(150,150,150))
+            rect_letter = text_letter.get_rect(center=((offset_x+case_size//2)+(i*case_size),(offset_y + 8*case_size) +10))
+            screen.blit(text_letter,rect_letter)
 
-    return pygame.Surface((BORD_WIDTH,BORD_HEIGHT))
+    return pygame.Rect(offset_x,offset_y,bord_width,bord_height)
 
 
 def is_collinear(v1,v2):
@@ -415,7 +419,7 @@ def is_select(game,event):
         for x in range(8):
             if selected_case[y][x]:
                 selected_case[y][x] = False
-                draw_bord(game.screen)
+                draw_bord(game.screen,game)
                 game.update()
 
     for y in range(len(game.bord)):
@@ -446,13 +450,13 @@ def move(game, original_x, original_y, des_x, des_y):
     """
 
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
-        draw_bord(game.screen)
+        draw_bord(game.screen,game)
         game.move_illegal_sound.play()
         game.update()
         return
 
     if not is_safe_move(game,original_x, original_y, des_x, des_y,game.turn):
-        draw_bord(game.screen)
+        draw_bord(game.screen,game)
         game.move_illegal_sound.play()
         game.update()
         return
@@ -469,7 +473,7 @@ def move(game, original_x, original_y, des_x, des_y):
     if (des_x, des_y) in QUEEN_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
         piece.nb_move += 1
         movement = execute_castle(game, piece.color, False)
-        draw_bord(game.screen)
+        draw_bord(game.screen,game)
         game.update()
         game.switch_turn()
         game.castle_sound.play()
@@ -477,7 +481,7 @@ def move(game, original_x, original_y, des_x, des_y):
     elif (des_x, des_y) in KING_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
         piece.nb_move += 1
         movement = execute_castle(game, piece.color, True)
-        draw_bord(game.screen)
+        draw_bord(game.screen,game)
         game.update()
         game.switch_turn()
         game.castle_sound.play()
@@ -485,7 +489,7 @@ def move(game, original_x, original_y, des_x, des_y):
     piece.nb_move += 1
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
-    draw_bord(game.screen)
+    draw_bord(game.screen,game)
     game.update()
     promotion = game.bord[des_y][des_x].promotion()
     if promotion:
@@ -556,7 +560,7 @@ def create_pgn(list_coup,color,game):
         elif game.stalemate:
             result = "1/2-1/2"
         else:
-            result = "???"
+            result = "*"
         file.write(f'[Event ""]\n'
                    f'[Site ""]\n'
                    f'[Date ""]\n'
@@ -564,7 +568,7 @@ def create_pgn(list_coup,color,game):
                    f'[White "Player_1"]\n'
                    f'[Black "Player_2"]\n'
                    f'[Result "{result}"]\n'
-                   f'[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq – 0 1"]\n')
+                   f'[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]\n')
         for i in range(len(list_coup)):
             file.write(f"{i+1}. ")
             for movement in list_coup[i]:
