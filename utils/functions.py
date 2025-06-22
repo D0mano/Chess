@@ -188,12 +188,18 @@ def show_possible_move(game,pos):
     for y in range(8):
         for x in range(8):
             if is_legal_move(game,orig_x,orig_y,x,y) and is_safe_move(game,orig_x,orig_y,x,y,game.turn):
+                piece_2 = game.bord[y][x]
                 pos_2 = chess_to_xy((x, y))
                 top_left_x = pos_2[0] - CASE_SIZE // 2
                 top_left_y = pos_2[1] - CASE_SIZE // 2
-                circle_surf = pygame.Surface((CASE_SIZE,CASE_SIZE),pygame.SRCALPHA)
-                pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (CASE_SIZE/2,CASE_SIZE/2), 10)
-                game.screen.blit(circle_surf, (top_left_x, top_left_y))
+                circle_surf = pygame.Surface((CASE_SIZE, CASE_SIZE), pygame.SRCALPHA)
+
+                if piece_2 is not None and piece.color != piece_2.color:
+                    pygame.draw.circle(circle_surf,COLOR_CHECK,(CASE_SIZE/2,CASE_SIZE/2),35,width=3)
+                    game.screen.blit(circle_surf,(top_left_x,top_left_y))
+                else:
+                    pygame.draw.circle(circle_surf, SELECTION_COLOR_3, (CASE_SIZE/2,CASE_SIZE/2), 10)
+                    game.screen.blit(circle_surf, (top_left_x, top_left_y))
 
 
 def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
@@ -451,7 +457,6 @@ def move(game, original_x, original_y, des_x, des_y):
 
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen,game)
-        game.move_illegal_sound.play()
         game.update()
         return
 
@@ -487,11 +492,14 @@ def move(game, original_x, original_y, des_x, des_y):
         game.castle_sound.play()
         return movement
     piece.nb_move += 1
+    promotion = game.bord[original_y][original_x].promotion(des_x,des_y)
+
+    notation = algebraic_notation(game, original_x, original_y, des_x, des_y, capture, game.check, game.checkmate,
+                       piece.type_piece, promotion)
     game.bord[des_y][des_x] = piece
     game.bord[original_y][original_x] = None
     draw_bord(game.screen,game)
     game.update()
-    promotion = game.bord[des_y][des_x].promotion()
     if promotion:
         game.update()
     game.increment(game.turn,game.increment_time)
@@ -504,13 +512,15 @@ def move(game, original_x, original_y, des_x, des_y):
 
     if game.checkmate:
         game.game_end_sound.play()
+        notation += "#"
     elif game.check:
         game.move_check_sound.play()
+        notation += "+"
     elif capture:
         game.capture_sound.play()
     else:
         game.move_self_sound.play()
-    return algebraic_notation(original_x,des_x,des_y,capture,game.check,game.checkmate,piece.type_piece,promotion)
+    return notation
 
 
 def move_simu(bord,o_x,o_y,d_x,d_y):
@@ -520,33 +530,35 @@ def move_simu(bord,o_x,o_y,d_x,d_y):
     bord[o_y][o_x] = None
 
 
-def algebraic_notation( original_x, des_x, des_y, capture, check, checkmate, type_piece,promotion):
+def algebraic_notation( game,original_x,original_y, des_x, des_y, capture, check, checkmate, type_piece,promotion):
+    other = find_other_piece(game,original_x,original_y,type_piece)
+
     if capture:
         if promotion:
             notation = COLUMNS[original_x] + "x" + COLUMNS[des_x] + ROWS[des_y] + "=" + PIECE_PGN[type_piece]
 
-        elif type_piece == PAWN:
+        elif type_piece == PAWN :
             notation = COLUMNS[original_x] + "x" + COLUMNS[des_x] + ROWS[des_y]
+
+        elif other is not None and is_legal_move(game,other[0],other[1],des_x, des_y):
+            notation = PIECE_PGN[type_piece] + COLUMNS[original_x] + ROWS[original_y] + "x" + COLUMNS[des_x] + ROWS[des_y]
 
         else:
             notation = PIECE_PGN[type_piece] + "x" + COLUMNS[des_x] + ROWS[des_y]
-        if checkmate:
-            notation += "#"
-        elif check:
-            notation += "+"
+
+
         return notation
     else:
         if promotion:
             notation = COLUMNS[des_x] + ROWS[des_y] + "=" + PIECE_PGN[type_piece]
-        elif type_piece == PAWN:
+        elif type_piece == PAWN :
             notation = COLUMNS[des_x] + ROWS[des_y]
+
+        elif other is not None and is_legal_move(game,other[0],other[1],des_x, des_y):
+            notation = PIECE_PGN[type_piece] + COLUMNS[original_x] + ROWS[original_y]  + COLUMNS[des_x] + ROWS[des_y]
         else:
             notation = PIECE_PGN[type_piece] + COLUMNS[des_x] + ROWS[des_y]
 
-        if checkmate:
-            notation += "#"
-        elif check:
-            notation += "+"
         return notation
 
 
@@ -673,6 +685,16 @@ def execute_castle(game, color, king_side=True):
     rook.nb_move += 1
 
     return "O-O" if king_side else "O-O-O"
+
+def find_other_piece(game,orig_x,orig_y,type_piece):
+    for y in range(8):
+        for x in range(8):
+            if game.bord[y][x] is not None:
+                if game.bord[y][x].type_piece == type_piece and (x,y) != (orig_x,orig_y) and game.bord[y][x].color == game.bord[orig_y][orig_x].color:
+                    return x,y
+    return
+
+
 
 
 

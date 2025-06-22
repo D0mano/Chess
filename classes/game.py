@@ -11,7 +11,7 @@ class Game:
         self.screen = None
         self.bord = []
         self.bord_color = CLASSICAL_BORD
-        self.path = "pieces_2"
+        self.path = "pieces"
         self.bord_copy = []
         self.is_increment = False
         self.increment_time = 0
@@ -100,7 +100,6 @@ class Game:
                 if piece is not None and piece.color == color:
                     if piece.count_possible_move() != 0:
                         return False
-        print("Checkmate !!")
         return True
 
     def is_stalemate(self, color):

@@ -25,12 +25,12 @@ class Pieces:
         self.nb_possible_move = 0
         self.path = game.path
 
-    def promotion(self):
-        if self.type_piece == PAWN and self.color == WHITE and self.y == 0:
+    def promotion(self,des_x,des_y):
+        if self.type_piece == PAWN and self.color == WHITE and des_y == 0:
             self._promote_to_queen()
             self.game.update()
             return True
-        elif self.type_piece == PAWN and self.color == BLACK and self.y == 7:
+        elif self.type_piece == PAWN and self.color == BLACK and des_y == 7:
             self._promote_to_queen()
             self.game.update()
             return True

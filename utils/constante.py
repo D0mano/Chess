@@ -30,6 +30,11 @@ COLOR_CLEAR_CASE_3 = (235, 236, 208) # #ebecd0
 COLOR_DARK_CASE_3 = (115, 149, 82)  # #739552
 GREEN_BORD = [COLOR_CLEAR_CASE_3,COLOR_DARK_CASE_3]
 
+COLOR_CLEAR_CASE_4 = (144, 143, 141)
+COLOR_DARK_CASE_4 = (110, 109, 107)
+
+GRAY_BORD = [COLOR_CLEAR_CASE_4,COLOR_DARK_CASE_4]
+
 
 # Couleurs d'interface
 BACKGROUND_COLOR = (48, 46, 43)  # Fond de la fenêtre
@@ -140,6 +145,60 @@ PLATEAU_NULL = [
     # 1 (7)
     [(WHITE, KING), EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY]
 ]
+
+PLATEAU_AMBIGUITE = [
+    # Ligne 8 (index 0)
+    [EMPTY, EMPTY, EMPTY, EMPTY, (BLACK, KING), EMPTY, EMPTY, EMPTY],
+
+    # Ligne 7 (index 1)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 6 (index 2)
+    [EMPTY, EMPTY, (BLACK, KNIGHT), EMPTY, EMPTY, EMPTY, (BLACK, KNIGHT), EMPTY],
+
+    # Ligne 5 (index 3)
+    [EMPTY, EMPTY, EMPTY, (BLACK, ROOK), EMPTY, (BLACK, ROOK), EMPTY, EMPTY],
+
+    # Ligne 4 (index 4)
+    [EMPTY, (BLACK, BISHOP), EMPTY, EMPTY, EMPTY, EMPTY, (BLACK, BISHOP), EMPTY],
+
+    # Ligne 3 (index 5)
+    [EMPTY, EMPTY, (WHITE, BISHOP), EMPTY, EMPTY, EMPTY, (WHITE, BISHOP), EMPTY],
+
+    # Ligne 2 (index 6)
+    [EMPTY, EMPTY, EMPTY, (WHITE, ROOK), EMPTY, (WHITE, ROOK), EMPTY, EMPTY],
+
+    # Ligne 1 (index 7)
+    [EMPTY, EMPTY, (WHITE, KNIGHT), EMPTY, (WHITE, KING), EMPTY, (WHITE, KNIGHT), EMPTY]
+]
+
+
+PLATEAU_PROMOTION = [
+    # Ligne 8 (index 0)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 7 (index 1) – Pions blancs prêts à promouvoir
+    [(WHITE, PAWN), EMPTY, (WHITE, PAWN), EMPTY, (WHITE, PAWN), EMPTY, (WHITE, PAWN), EMPTY],
+
+    # Ligne 6 (index 2)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 5 (index 3)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 4 (index 4)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 3 (index 5)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 2 (index 6)
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+
+    # Ligne 1 (index 7)
+    [(BLACK, KING), EMPTY, EMPTY, EMPTY, (WHITE, KING), EMPTY, EMPTY, EMPTY]
+]
+
 
 
 # === COORDONNÉES D'ÉCHIQUIER ===

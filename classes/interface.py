@@ -256,8 +256,8 @@ def mode_selecting(game,screen):
 def ATH_selecting(game,screen):
     pygame.init()
     font = pygame.font.SysFont("impact",60)
-    paths = ["pieces","pieces_2"]
-    bord_colors = [CLASSICAL_BORD,GREEN_BORD,CIEL_BORD]
+    paths = ["pieces","pieces_2","pieces_3","pieces_4"]
+    bord_colors = [CLASSICAL_BORD,GREEN_BORD,CIEL_BORD,GRAY_BORD]
 
     running = True
     piece_index = 0
