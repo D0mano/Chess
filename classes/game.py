@@ -4,19 +4,24 @@ from utils.functions import *
 from classes.interface import *
 
 
+
 class Game:
     def __init__(self):
         self.running = True
         self.is_playing = False
+        self.in_menu = True
+        self.in_mode_selection = False
         self.screen = None
         self.bord = []
         self.bord_color = CLASSICAL_BORD
         self.path = "pieces"
         self.bord_copy = []
+        self.time_is_stop = False
         self.is_increment = False
         self.increment_time = 0
         self.white_time = None
         self.black_time = None
+        self.time = None
         self.turn = WHITE
         self.nb_turn = 1
         self.check = None
@@ -56,6 +61,9 @@ class Game:
         self.black_roque = True
         self.path = "pieces"
         self.bord_color = CLASSICAL_BORD
+        self.checkmate = False
+        self.check = False
+        self.stalemate = False
 
     def update(self):
         """
@@ -118,6 +126,7 @@ class Game:
     def set_time(self,time):
         self.white_time = time
         self.black_time = time
+        self.time = time
 
     def set_increment_time(self,time):
         self.increment_time = time
@@ -138,11 +147,15 @@ class Game:
         self.set_time(time)
         self.set_increment_time(increment_time)
 
+    def stop_time(self):
+        self.time_is_stop = True
+    def start_time(self):
+        self.time_is_stop = False
+
 
 
 
     def star_game(self):
-
 
         self.screen.fill(BACKGROUND_COLOR)
         display_current_player(self)
@@ -153,12 +166,16 @@ class Game:
         self.update()
         coup = []
         list_coup = []
+        self.start_time()
         while self.is_playing:
+            self.end_game()
+
 
             dt = clock.tick(30) / 1000
 
             display_timer(self)
-            self.decrement_time(self.turn, dt)
+            if not self.time_is_stop:
+                self.decrement_time(self.turn, dt)
 
 
 
@@ -190,6 +207,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.is_playing = False
                         self.reinitialise_game()
+                        self.in_menu = True
 
             pygame.display.flip()
         if coup:
@@ -202,6 +220,21 @@ class Game:
 
     def set_piece(self,path):
         self.path = path
+
+    def end_game(self):
+        end = False
+        if self.white_time == 0:
+            end = True
+        elif self.black_time == 0:
+            end = True
+        elif self.checkmate:
+            end = True
+        elif self.stalemate:
+            end = True
+        if end:
+            self.stop_time()
+            End_banner(self,self.screen)
+
 
 
 

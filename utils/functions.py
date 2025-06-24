@@ -539,7 +539,7 @@ def move(game, original_x, original_y, des_x, des_y):
     game.switch_turn()
     game.check = is_check(game, game.turn)
     game.checkmate = game.is_checkmate(game.turn)
-    stalemate = game.is_stalemate(game.turn)
+    game.stalemate = game.is_stalemate(game.turn)
 
 
 

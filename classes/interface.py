@@ -103,27 +103,35 @@ def main_menu(game):
     screen.fill(BACKGROUND_COLOR)
     logo = pygame.image.load("assets/ChessRush.png")
     logo_rect = logo.get_rect(center=(WINDOW_WIDTH/2,WINDOW_HEIGHT/3))
-    menu = True
     screen.blit(logo,logo_rect)
     pygame.draw.rect(screen,(33, 32, 31),play_button_rect,border_radius=20)
     pygame.draw.rect(screen,(33, 32, 31),quit_button_rect,border_radius=20)
     screen.blit(text_quit,text_quit_rect)
     screen.blit(text_play,text_play_rect)
-    while menu:
+    while game.in_menu:
+        screen.fill(BACKGROUND_COLOR)
+        logo = pygame.image.load("assets/ChessRush.png")
+        logo_rect = logo.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3))
+        screen.blit(logo, logo_rect)
+        pygame.draw.rect(screen, (33, 32, 31), play_button_rect, border_radius=20)
+        pygame.draw.rect(screen, (33, 32, 31), quit_button_rect, border_radius=20)
+        screen.blit(text_quit, text_quit_rect)
+        screen.blit(text_play, text_play_rect)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    menu = False
+                    game.in_menu = False
                     game.running =  False
             if event.type == pygame.MOUSEBUTTONUP:
                 if play_button_rect.collidepoint(event.pos):
-                    menu = False
+                    game.in_menu = False
+                    game.in_mode_selection = True
                     mode_selecting(game,screen)
                 elif quit_button_rect.collidepoint(event.pos):
-                    menu = False
+                    game.in_menu = False
                     game.running = False
 
 def mode_selecting(game,screen):
@@ -200,17 +208,17 @@ def mode_selecting(game,screen):
         all_button.extend(button_rect)
 
 
-    running = True
-    while running:
+    while game.in_mode_selection:
 
 
         # Gestion des événements
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                game.in_mode_selection = False
             if event.type == pygame.KEYDOWN:
                 if event.key == K_ESCAPE:
-                    running = False
+                    game.in_mode_selection = False
+                    game.in_menu = True
             if event.type == pygame.MOUSEBUTTONUP:
                 mode_selected = False
                 for (rect,mode) in all_button:
@@ -244,12 +252,11 @@ def mode_selecting(game,screen):
                             mode_selected = True
                 if mode_selected:
                     ATH_selecting(game,screen)
-                    running = False
+                    game.in_mode_selection = False
 
         pygame.display.flip()
         clock.tick(60)
 
-    pygame.quit()
 
 
 
@@ -309,27 +316,120 @@ def ATH_selecting(game,screen):
                     running = False
                     game.is_playing = True
 
-
-
-
-
-
-
         pygame.display.flip()
 
 
 
+def End_banner(game,screen):
+    # Couleurs
+    white = (255, 255, 255)
+    LIGHT_GRAY = (235, 234, 232)
+    DARK_GRAY = (90, 90, 90)
+    black = (0, 0, 0)
+
+    # Police
+    font_title = pygame.font.SysFont("Arial", 36, bold=True)
+    font_score = pygame.font.SysFont("Arial", 28, bold=True)
+    font_button = pygame.font.SysFont("Arial", 24)
+
+    # Centrage
+    banner_width = 300
+    banner_height = 320
+    banner_x = (GAME_WINDOW_WIDTH - banner_width) // 2
+    banner_y = (GAME_WINDOW_HEIGHT - banner_height) // 2
+
+    # Fonctions
+    def draw_rounded_rect(surface, color, rect, radius=10):
+        pygame.draw.rect(surface, color, rect, border_radius=radius)
+
+    def draw_banner():
+        # Fond principal
+        draw_rounded_rect(screen, white, (banner_x, banner_y, banner_width, banner_height), radius=10)
+
+        # Titre (ex. "White Won")
+        title_rect = (banner_x + 20, banner_y - 40, banner_width - 40, 50)
+        draw_rounded_rect(screen, DARK_GRAY, title_rect, radius=10)
+        if game.turn == BLACK and game.checkmate:
+            title_surf = font_title.render("White Won", True, white)
+            score_text = font_score.render("1-0", True, black)
+
+        elif game.turn == WHITE and game.checkmate:
+            title_surf = font_title.render("Black Won", True, white)
+            score_text = font_score.render("0-1", True, black)
+
+        else:
+            title_surf = font_title.render("Stalemate", True, white)
+            score_text = font_score.render("1/2-1/2", True, black)
+
+        screen.blit(title_surf, (title_rect[0] + (title_rect[2] - title_surf.get_width()) // 2,
+                                 title_rect[1] + (title_rect[3] - title_surf.get_height()) // 2))
+
+        # Avatars
+        avatar_size = 80
+        avatar_y = banner_y + 50
+
+        white_avatar = pygame.image.load("assets/white-avatar.png")
+        white_avatar = pygame.transform.scale(white_avatar,(avatar_size, avatar_size))
+
+        black_avatar = pygame.image.load("assets/black-avatar.png")
+        black_avatar = pygame.transform.scale(black_avatar, (avatar_size, avatar_size))
+
+        screen.blit(white_avatar,(banner_x + 40, avatar_y))
+        screen.blit(black_avatar,(banner_x + banner_width - avatar_size - 40, avatar_y))
 
 
+        screen.blit(score_text, (banner_x + (banner_width - score_text.get_width()) // 2,
+                                 avatar_y + (avatar_size - score_text.get_height()) // 2))
 
+        # Boutons
+        button_width = 180
+        button_height = 50
+        button_spacing = 20
+        button_y_start = avatar_y + avatar_size + 40
 
+        rematch_rect = pygame.Rect(banner_x + (banner_width - button_width) // 2, button_y_start, button_width,
+                                   button_height)
+        quit_rect = pygame.Rect(banner_x + (banner_width - button_width) // 2,
+                                button_y_start + button_height + button_spacing, button_width, button_height)
 
+        draw_rounded_rect(screen, LIGHT_GRAY, rematch_rect, radius=10)
+        draw_rounded_rect(screen, LIGHT_GRAY, quit_rect, radius=10)
 
+        rematch_text = font_button.render("REMATCH", True, DARK_GRAY)
+        quit_text = font_button.render("QUIT", True, DARK_GRAY)
 
+        screen.blit(rematch_text, (rematch_rect.x + (rematch_rect.width - rematch_text.get_width()) // 2,
+                                   rematch_rect.y + (rematch_rect.height - rematch_text.get_height()) // 2))
+        screen.blit(quit_text, (quit_rect.x + (quit_rect.width - quit_text.get_width()) // 2,
+                                quit_rect.y + (quit_rect.height - quit_text.get_height()) // 2))
 
+        return rematch_rect, quit_rect
 
+    pygame.time.delay(1500)
 
+    # Boucle principale
+    running = True
+    rematch_button, quit_button = None, None
+    while running:
+        rematch_button, quit_button = draw_banner()
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if rematch_button.collidepoint(event.pos):
+                    print("Rematch !")
+                    running = False
+                    game.reinitialise_game()
+                    game.set_bord(PLATEAU_INITIAL)
+                    game.game_start_sound.play()
 
+                elif quit_button.collidepoint(event.pos):
+                    running = False
+                    game.reinitialise_game()
+                    game.is_playing = False
+                    game.in_menu = True
+
+        pygame.display.flip()
 
