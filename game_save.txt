@@ -4,6 +4,6 @@
 [Round ""]
 [White "Player_1"]
 [Black "Player_2"]
-[Result "0-1"]
+[Result "*"]
 [FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
-1. e8=Q Kb2 2. c8=Q Ka3 3. Qb5 Ka2 4. Qc2+ Ka1 5. Qb5b1# 0-1
+*

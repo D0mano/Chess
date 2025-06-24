@@ -1,6 +1,5 @@
 import pygame
 import math
-import copy
 
 from utils.constante import *
 
@@ -208,6 +207,8 @@ def is_legal_move_pawn(game,orig_x,orig_y,des_x,des_y):
     # Computation of the distance
     d_x = des_x - orig_x
     d_y = des_y - orig_y
+    if can_en_passant(game,orig_x, orig_y, des_x, des_y):
+        return True
     if destination is not None:
         if (d_x, d_y) in original.movement_2:
             return True
@@ -454,7 +455,6 @@ def move(game, original_x, original_y, des_x, des_y):
     :param des_y: y-coordinate of the destination of the piece
     :return: A string describing the move
     """
-
     if not is_legal_move(game, original_x, original_y, des_x, des_y):
         draw_bord(game.screen,game)
         game.update()
@@ -469,19 +469,44 @@ def move(game, original_x, original_y, des_x, des_y):
 
 
 
+
+
     capture = False
     if game.bord[des_y][des_x] is not None:
         capture = True
+    if can_en_passant(game,original_x,original_y,des_x, des_y):
+        movement = execute_en_passant(game,original_x,original_y,des_x, des_y)
+        draw_bord(game.screen, game)
+        game.update()
+        game.switch_turn()
+        game.capture_sound.play()
+        game.last_move = {
+            'piece_type': PAWN,
+            'from_x': original_x,
+            'from_y': original_y,
+            'to_x': des_x,
+            'to_y': des_y,
+            'en_passant': True,
+            'castle': False}
+        return movement
+
 
 
     piece = game.bord[original_y][original_x]
     if (des_x, des_y) in QUEEN_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
-        piece.nb_move += 1
         movement = execute_castle(game, piece.color, False)
         draw_bord(game.screen,game)
         game.update()
         game.switch_turn()
         game.castle_sound.play()
+        game.last_move = {
+                    'piece_type': KING,
+                    'from_x': original_x,
+                    'from_y': original_y,
+                    'to_x': des_x,
+                    'to_y': des_y,
+                    'en_passant': False,
+                    'castle': True}
         return movement
     elif (des_x, des_y) in KING_SIDE_CASTLE and piece.type_piece == KING and piece.nb_move == 0:
         piece.nb_move += 1
@@ -490,6 +515,14 @@ def move(game, original_x, original_y, des_x, des_y):
         game.update()
         game.switch_turn()
         game.castle_sound.play()
+        game.last_move = {
+            'piece_type': KING,
+            'from_x': original_x,
+            'from_y': original_y,
+            'to_x': des_x,
+            'to_y': des_y,
+            'en_passant': False,
+            'castle': True}
         return movement
     piece.nb_move += 1
     promotion = game.bord[original_y][original_x].promotion(des_x,des_y)
@@ -520,6 +553,14 @@ def move(game, original_x, original_y, des_x, des_y):
         game.capture_sound.play()
     else:
         game.move_self_sound.play()
+    game.last_move = {
+        'piece_type': piece.type_piece,
+        'from_x': original_x,
+        'from_y': original_y,
+        'to_x': des_x,
+        'to_y': des_y,
+        'en_passant': False,
+        'castle': False}
     return notation
 
 
@@ -566,9 +607,9 @@ def create_pgn(list_coup,color,game):
     with open("game_save.txt","w") as file:
         result = ""
         if color == WHITE and game.checkmate:
-            result = "1-0"
-        elif color == BLACK and game.checkmate:
             result = "0-1"
+        elif color == BLACK and game.checkmate:
+            result = "1-0"
         elif game.stalemate:
             result = "1/2-1/2"
         else:
@@ -685,6 +726,42 @@ def execute_castle(game, color, king_side=True):
     rook.nb_move += 1
 
     return "O-O" if king_side else "O-O-O"
+
+def can_en_passant(game,orig_x,orig_y,des_x,des_y):
+    pawn = game.bord[orig_y][orig_x]
+    if pawn is None or pawn.type_piece != PAWN:
+        return False
+    color = pawn.color
+    if (color == WHITE and pawn.y != 3) or (color == BLACK and pawn.y != 4):
+        return False
+    dx = des_x - orig_x
+    dy = des_y - orig_y
+
+    if (dx,dy) not in pawn.movement_2:
+        return False
+
+    adjacent_pawn = game.bord[orig_y][des_x]
+    if adjacent_pawn is None or adjacent_pawn.type_piece != PAWN or adjacent_pawn.color == color:
+        return False
+
+    if game.last_move is None:
+        return False
+
+    if (game.last_move["piece_type"] == PAWN and
+        game.last_move["to_x"] == des_x and
+        game.last_move["to_y"] == orig_y and
+        abs(game.last_move['from_y'] - game.last_move['to_y']) == 2):
+        return True
+    return False
+
+def execute_en_passant(game,orig_x,orig_y,des_x,des_y):
+    pawn = game.bord[orig_y][orig_x]
+    pawn.nb_move += 1
+    game.bord[orig_y][des_x] = None
+    game.bord[des_y][des_x] = pawn
+    game.bord[orig_y][orig_x] = None
+    return f"{COLUMNS[orig_x]}x{COLUMNS[des_x]}{ROWS[des_y]}"
+
 
 def find_other_piece(game,orig_x,orig_y,type_piece):
     for y in range(8):

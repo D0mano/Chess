@@ -22,6 +22,7 @@ class Game:
         self.check = None
         self.checkmate = None
         self.stalemate = None
+        self.last_move = None
         self.white_roque = True
         self.black_roque = True
         self.game_start_sound = pygame.mixer.Sound(f"assets/sounds/game-start.mp3")
