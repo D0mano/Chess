@@ -212,6 +212,7 @@ class Game:
         if coup:
             list_coup.append(coup)
         create_pgn(list_coup, -self.turn, self)
+        self.stop_time()
 
 
     def set_bord_color(self,color):
@@ -230,9 +231,6 @@ class Game:
             end = True
         elif self.stalemate:
             end = True
-        if end:
-            self.stop_time()
-            End_banner(self,self.screen)
         return end
 
 

@@ -427,9 +427,7 @@ def End_banner(game,screen):
                     print("Rematch !")
                     running = False
                     game.reinitialise_game()
-                    game.set_bord(PLATEAU_INITIAL)
-                    game.set_mode(game.time,game.increment_time)
-                    game.star_game()
+                    game.is_playing = True
 
                 elif quit_button.collidepoint(event.pos):
                     running = False

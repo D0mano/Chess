@@ -14,6 +14,8 @@ while game.running:
         game.set_screen(game_screen)
         game.set_bord(PLATEAU_INITIAL)
         game.star_game()
+        End_banner(game, game.screen)
+
     else:
         main_menu(game)
 
