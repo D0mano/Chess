@@ -251,9 +251,13 @@ def mode_selecting(game,screen):
                             game.set_mode(THIRTY_MIN)
                             mode_selected = True
                 if mode_selected:
-                    ATH_selecting(game,screen)
                     game.in_mode_selection = False
-
+                    ATH_selecting(game,screen)
+                    screen.fill(DARK_BG)
+                    for i, col in enumerate(columns):
+                        x = margin + i * (col_width + spacing)
+                        button_rect = draw_column(x, y, col_width, col_height, col["title"], col["modes"])
+                        all_button.extend(button_rect)
         pygame.display.flip()
         clock.tick(60)
 
@@ -284,7 +288,7 @@ def ATH_selecting(game,screen):
     while running:
         piece_rect = piece.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3))
         screen.fill(BACKGROUND_COLOR)
-        piece = pygame.image.load(f"assets/{paths[piece_index]}/white-pawn.png")
+        piece = pygame.image.load(f"assets/{game.path}/white-pawn.png")
         bord_rect = draw_bord(screen, game, True, WINDOW_WIDTH // 2 - 56, WINDOW_HEIGHT // 2, 112, 112, 14)
         screen.blit(piece, piece_rect)
         pygame.draw.rect(screen, (33, 32, 31), play_button_rect, border_radius=20)
@@ -295,6 +299,7 @@ def ATH_selecting(game,screen):
             if event.type == pygame.KEYDOWN:
                 if event.key == K_ESCAPE:
                     running = False
+                    game.in_mode_selection = True
             if event.type == MOUSEBUTTONUP:
                 if bord_rect.collidepoint(event.pos):
                     if color_index == len(bord_colors)-1:
@@ -349,11 +354,11 @@ def End_banner(game,screen):
         # Titre (ex. "White Won")
         title_rect = (banner_x + 20, banner_y - 40, banner_width - 40, 50)
         draw_rounded_rect(screen, DARK_GRAY, title_rect, radius=10)
-        if game.turn == BLACK and game.checkmate:
+        if (game.turn == BLACK and game.checkmate) or game.black_time < 1 :
             title_surf = font_title.render("White Won", True, white)
             score_text = font_score.render("1-0", True, black)
 
-        elif game.turn == WHITE and game.checkmate:
+        elif (game.turn == WHITE and game.checkmate) or game.white_time < 1:
             title_surf = font_title.render("Black Won", True, white)
             score_text = font_score.render("0-1", True, black)
 
@@ -423,7 +428,8 @@ def End_banner(game,screen):
                     running = False
                     game.reinitialise_game()
                     game.set_bord(PLATEAU_INITIAL)
-                    game.game_start_sound.play()
+                    game.set_mode(game.time,game.increment_time)
+                    game.star_game()
 
                 elif quit_button.collidepoint(event.pos):
                     running = False

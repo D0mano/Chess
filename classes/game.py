@@ -59,8 +59,6 @@ class Game:
         self.nb_turn = 1
         self.white_roque = True
         self.black_roque = True
-        self.path = "pieces"
-        self.bord_color = CLASSICAL_BORD
         self.checkmate = False
         self.check = False
         self.stalemate = False
@@ -168,7 +166,8 @@ class Game:
         list_coup = []
         self.start_time()
         while self.is_playing:
-            self.end_game()
+            if self.end_game():
+                self.is_playing = False
 
 
             dt = clock.tick(30) / 1000
@@ -223,9 +222,9 @@ class Game:
 
     def end_game(self):
         end = False
-        if self.white_time == 0:
+        if self.white_time < 1:
             end = True
-        elif self.black_time == 0:
+        elif self.black_time < 1:
             end = True
         elif self.checkmate:
             end = True
@@ -234,6 +233,7 @@ class Game:
         if end:
             self.stop_time()
             End_banner(self,self.screen)
+        return end
 
 
 
