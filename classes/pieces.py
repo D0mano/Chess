@@ -174,4 +174,6 @@ class King(Pieces):
         self.rect = self.image.get_rect(center=(chess_to_xy((self.rect.x, self.rect.y))))
         self.movement = KING_DIRECTION
         self.movement_type = JUMPING
+        self.queen_castle = (2,0) if color == BLACK else (2,7)
+        self.king_castle = (6,0) if color == BLACK else (6,7)
 

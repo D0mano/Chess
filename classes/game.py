@@ -110,6 +110,21 @@ class Game:
         return True
 
     def is_stalemate(self, color):
+        if self.is_pat(color):
+            return True
+
+        remaining = self.pieces_remaining()
+        if sorted(remaining) == sorted([KING,KING]):
+            return True
+        if sorted(remaining) == sorted([KING,KING,BISHOP]):
+            return True
+        if sorted(remaining) == sorted([KING,KING,KNIGHT]):
+            return True
+        if sorted(remaining) == sorted([KING,BISHOP,KING,BISHOP]):
+            return True
+        return False
+
+    def is_pat(self,color):
         if  self.check:
             return False
         for y in range(8):
@@ -118,8 +133,8 @@ class Game:
                 if piece is not None and piece.color == color:
                     if piece.count_possible_move() != 0:
                         return False
-        print("Stalemate !!")
         return True
+
 
     def set_time(self,time):
         self.white_time = time
@@ -232,6 +247,16 @@ class Game:
         elif self.stalemate:
             end = True
         return end
+
+    def pieces_remaining(self):
+        pieces = []
+        for y in range(8):
+            for x in range(8):
+                piece = self.bord[y][x]
+                if piece is not None:
+                    pieces.append(piece.type_piece)
+        return pieces
+
 
 
 
